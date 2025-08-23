@@ -1,0 +1,1037 @@
+/* Hyper-Acc Virtual Numbers Plugin - Frontend Styles */
+
+/* Main Container */
+.havn-virtual-numbers-container {
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+  background: #f5f5f5 !important;
+  min-height: 100vh !important;
+}
+
+/* Rent Wrapper */
+.havn-virtual-numbers-container .rent-wrapper {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  margin: 20px !important;
+}
+
+/* Rent Header */
+.havn-virtual-numbers-container .rent-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px !important;
+  background: #FFEFEC !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.havn-virtual-numbers-container .rent-title {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #FC5A44 !important;
+  margin: 0 !important;
+}
+
+/* Search Box */
+.havn-virtual-numbers-container .search-box {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.havn-virtual-numbers-container .search-box input {
+  padding: 12px 16px !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  width: 300px !important;
+  transition: all 0.3s ease !important;
+  background: #ffffff !important;
+}
+
+.havn-virtual-numbers-container .search-box input:focus {
+  outline: none !important;
+  border-color: #FC5A44 !important;
+  box-shadow: 0 0 0 3px rgba(252, 90, 68, 0.1) !important;
+}
+
+.havn-virtual-numbers-container .clear-search {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  transition: all 0.3s ease !important;
+}
+
+.havn-virtual-numbers-container .clear-search:hover {
+  background: #FFEFEC !important;
+  color: #FC5A44 !important;
+}
+
+.havn-virtual-numbers-container .info-btn {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease !important;
+  margin-right: 8px !important;
+}
+
+.havn-virtual-numbers-container .info-btn:hover {
+  background: #e53e3e !important;
+  transform: translateY(-1px) !important;
+}
+
+.havn-virtual-numbers-container .info-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 999999 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.havn-virtual-numbers-container .info-modal-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.havn-virtual-numbers-container .info-modal-content {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+  max-width: 600px !important;
+  width: 90% !important;
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+  position: relative !important;
+  z-index: 1000000 !important;
+}
+
+.havn-virtual-numbers-container .info-modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px 24px 0 24px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  margin-bottom: 16px !important;
+}
+
+.havn-virtual-numbers-container .info-modal-header h3 {
+  color: #FC5A44 !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+.havn-virtual-numbers-container .close-modal {
+  background: none !important;
+  border: none !important;
+  font-size: 24px !important;
+  color: #6b7280 !important;
+  cursor: pointer !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  transition: all 0.3s ease !important;
+}
+
+.havn-virtual-numbers-container .close-modal:hover {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+}
+
+.havn-virtual-numbers-container .info-modal-body {
+  padding: 0 24px 24px 24px !important;
+  color: #374151 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+/* Purchase Confirmation Modal */
+.havn-virtual-numbers-container .purchase-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 999999 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.havn-virtual-numbers-container .purchase-modal-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.havn-virtual-numbers-container .purchase-modal-content {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+  max-width: 400px !important;
+  width: 90% !important;
+  position: relative !important;
+  z-index: 1000000 !important;
+}
+
+.havn-virtual-numbers-container .purchase-modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px 24px 0 24px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  margin-bottom: 16px !important;
+}
+
+.havn-virtual-numbers-container .purchase-modal-header h3 {
+  color: #FC5A44 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+.havn-virtual-numbers-container .purchase-modal-body {
+  padding: 0 24px 24px 24px !important;
+  text-align: center !important;
+}
+
+.havn-virtual-numbers-container .purchase-icon {
+  font-size: 48px !important;
+  margin-bottom: 16px !important;
+}
+
+.havn-virtual-numbers-container .purchase-modal-body p {
+  color: #374151 !important;
+  font-size: 16px !important;
+  margin-bottom: 8px !important;
+}
+
+.havn-virtual-numbers-container .purchase-note {
+  color: #6b7280 !important;
+  font-size: 14px !important;
+  margin-bottom: 0 !important;
+}
+
+.havn-virtual-numbers-container .purchase-modal-footer {
+  display: flex !important;
+  gap: 12px !important;
+  padding: 0 24px 24px 24px !important;
+  justify-content: flex-end !important;
+}
+
+/* Success Modal */
+.havn-virtual-numbers-container .success-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 999999 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.havn-virtual-numbers-container .success-modal-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.havn-virtual-numbers-container .success-modal-content {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+  max-width: 400px !important;
+  width: 90% !important;
+  position: relative !important;
+  z-index: 1000000 !important;
+}
+
+.havn-virtual-numbers-container .success-modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px 24px 0 24px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  margin-bottom: 16px !important;
+}
+
+.havn-virtual-numbers-container .success-modal-header h3 {
+  color: #10b981 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+.havn-virtual-numbers-container .success-modal-body {
+  padding: 0 24px 24px 24px !important;
+  text-align: center !important;
+}
+
+.havn-virtual-numbers-container .success-icon {
+  font-size: 48px !important;
+  margin-bottom: 16px !important;
+}
+
+.havn-virtual-numbers-container .success-modal-body p {
+  color: #374151 !important;
+  font-size: 16px !important;
+  margin: 0 !important;
+}
+
+.havn-virtual-numbers-container .success-modal-footer {
+  display: flex !important;
+  justify-content: center !important;
+  padding: 0 24px 24px 24px !important;
+}
+
+/* Error Modal */
+.havn-virtual-numbers-container .error-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 999999 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.havn-virtual-numbers-container .error-modal-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.havn-virtual-numbers-container .error-modal-content {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+  max-width: 400px !important;
+  width: 90% !important;
+  position: relative !important;
+  z-index: 1000000 !important;
+}
+
+.havn-virtual-numbers-container .error-modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px 24px 0 24px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  margin-bottom: 16px !important;
+}
+
+.havn-virtual-numbers-container .error-modal-header h3 {
+  color: #ef4444 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+.havn-virtual-numbers-container .error-modal-body {
+  padding: 0 24px 24px 24px !important;
+  text-align: center !important;
+}
+
+.havn-virtual-numbers-container .error-icon {
+  font-size: 48px !important;
+  margin-bottom: 16px !important;
+}
+
+.havn-virtual-numbers-container .error-modal-body p {
+  color: #374151 !important;
+  font-size: 16px !important;
+  margin: 0 !important;
+}
+
+.havn-virtual-numbers-container .error-modal-footer {
+  display: flex !important;
+  justify-content: center !important;
+  padding: 0 24px 24px 24px !important;
+}
+
+/* Button styles for modals */
+.havn-virtual-numbers-container .btn-primary {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.havn-virtual-numbers-container .btn-primary:hover {
+  background: #e53e3e !important;
+  transform: translateY(-1px) !important;
+}
+
+.havn-virtual-numbers-container .btn-secondary {
+  background: #6b7280 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.havn-virtual-numbers-container .btn-secondary:hover {
+  background: #4b5563 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Search Results Info */
+.havn-virtual-numbers-container .search-results-info {
+  display: none !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  background: #FFEFEC !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  margin-bottom: 20px !important;
+  color: #FC5A44 !important;
+  font-size: 14px !important;
+  position: relative !important;
+}
+
+.havn-virtual-numbers-container .search-results-info.show {
+  display: flex !important;
+}
+
+/* Rent Body */
+.havn-virtual-numbers-container .rent-body {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 30px !important;
+  padding: 20px !important;
+}
+
+/* Rent List (Services) */
+.havn-virtual-numbers-container .rent-list {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  max-height: 600px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+
+
+/* Services Container */
+.havn-virtual-numbers-container .services-container {
+  padding: 16px !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+}
+
+/* List Item (Service) */
+.havn-virtual-numbers-container .list-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px !important;
+  border: 2px solid #f3f4f6 !important;
+  border-radius: 10px !important;
+  margin-bottom: 12px !important;
+  transition: all 0.3s ease !important;
+  background: #ffffff !important;
+  cursor: pointer !important;
+}
+
+.havn-virtual-numbers-container .list-item:hover {
+  border-color: #FC5A44 !important;
+  box-shadow: 0 4px 12px rgba(252, 90, 68, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+.havn-virtual-numbers-container .list-item.active {
+  background: #fef2f2 !important;
+  border-color: #FC5A44 !important;
+  box-shadow: 0 4px 12px rgba(252, 90, 68, 0.15) !important;
+}
+
+.havn-virtual-numbers-container .list-item .service-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.havn-virtual-numbers-container .list-item .service-logo {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 8px !important;
+  object-fit: cover !important;
+  background: #f3f4f6 !important;
+}
+
+.havn-virtual-numbers-container .list-item .service-details {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.havn-virtual-numbers-container .list-item .service-name {
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+  font-size: 14px !important;
+}
+
+.havn-virtual-numbers-container .list-item .service-status {
+  font-size: 12px !important;
+  color: #6b7280 !important;
+}
+
+.havn-virtual-numbers-container .list-item .view-btn {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.havn-virtual-numbers-container .list-item .view-btn:hover {
+  background: #e53e3e !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Make eye icon white */
+.havn-virtual-numbers-container .list-item .view-btn {
+  color: #ffffff !important;
+}
+
+/* Rent Footer (Pagination) */
+.havn-virtual-numbers-container .rent-footer {
+  position: sticky !important;
+  bottom: 0 !important;
+  background: #ffffff !important;
+  border-top: 1px solid #e5e7eb !important;
+  padding: 16px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  z-index: 10 !important;
+  border-radius: 0 0 12px 12px !important;
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+.havn-virtual-numbers-container .pagination-info {
+  font-size: 14px !important;
+  color: #6b7280 !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+  padding: 10px !important;
+}
+
+.havn-virtual-numbers-container .pagination-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden !important;
+}
+
+.havn-virtual-numbers-container .page-numbers {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+  max-width: 120px !important;
+}
+
+.havn-virtual-numbers-container .btn.small {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  flex-shrink: 0 !important;
+}
+
+.havn-virtual-numbers-container .btn.small:hover {
+  background: #e53e3e !important;
+  transform: translateY(-1px) !important;
+}
+
+.havn-virtual-numbers-container .page {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.havn-virtual-numbers-container .page:hover {
+  background: #e53e3e !important;
+  transform: translateY(-1px) !important;
+}
+
+.havn-virtual-numbers-container .page-link.current {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(252, 90, 68, 0.3) !important;
+}
+
+/* Rent Table (Countries) */
+.havn-virtual-numbers-container .rent-table-box {
+  background: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.havn-virtual-numbers-container .rent-filters {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr auto !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  background: #FFEFEC !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  margin-bottom: 20px !important;
+  color: #FC5A44 !important;
+  font-size: 14px !important;
+  position: relative !important;
+}
+
+.havn-virtual-numbers-container .rent-filters span {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  position: relative !important;
+  padding-right: 32px !important;
+}
+
+.havn-virtual-numbers-container .rent-filters span::after {
+  content: '' !important;
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+.havn-virtual-numbers-container .rent-filters span:first-child::after {
+  background-image: url('../images/world.svg') !important;
+}
+
+.havn-virtual-numbers-container .rent-filters span:nth-child(2)::after {
+  background-image: url('../images/price-tag.svg') !important;
+}
+
+.havn-virtual-numbers-container .rent-filters span:nth-child(3)::after {
+  background-image: url('../images/check-circle.svg') !important;
+}
+
+.havn-virtual-numbers-container .rent-filters span:nth-child(4)::after {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FC5A44"><path d="M19 13H5v-2h14v2z"/></svg>') !important;
+}
+
+.havn-virtual-numbers-container .rent-table {
+  padding: 0 16px 16px 16px !important;
+}
+
+.havn-virtual-numbers-container .rent-table .row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr auto !important;
+  gap: 16px !important;
+  align-items: center !important;
+  padding: 16px !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  transition: background 0.2s ease !important;
+  position: relative !important;
+  background: #f5f5f5 !important;
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.havn-virtual-numbers-container .rent-table .row:hover {
+  background: #f0f0f0 !important;
+}
+
+.havn-virtual-numbers-container .rent-table .row.disabled {
+  opacity: 0.6 !important;
+  background: #f9fafb !important;
+}
+
+.havn-virtual-numbers-container .rent-table .row .col {
+  font-size: 14px !important;
+  color: #374151 !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* Country Flag */
+.havn-virtual-numbers-container .country-flag {
+  width: 16px !important;
+  height: 12px !important;
+  border-radius: 2px !important;
+  object-fit: cover !important;
+  margin-right: 8px !important;
+}
+
+/* Buttons */
+.havn-virtual-numbers-container .btn {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  min-width: 100px !important;
+  position: relative !important;
+  display: inline-block !important;
+}
+
+.havn-virtual-numbers-container .btn:hover {
+  background: #e53e3e !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(252, 90, 68, 0.3) !important;
+}
+
+.havn-virtual-numbers-container .btn.disabled {
+  background: #9ca3af !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .havn-virtual-numbers-container .rent-wrapper {
+    margin: 20px !important;
+    padding: 20px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-body {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-list {
+    max-height: 50vh !important;
+  }
+  
+  .havn-virtual-numbers-container .search-box input {
+    width: 200px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-footer {
+    padding: 14px !important;
+  }
+  
+  .havn-virtual-numbers-container .pagination-info {
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .havn-virtual-numbers-container {
+    padding: 10px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-wrapper {
+    margin: 10px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-header {
+    flex-direction: column !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+    padding: 16px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-title {
+    font-size: 20px !important;
+    text-align: center !important;
+  }
+  
+  .havn-virtual-numbers-container .search-box {
+    width: 100% !important;
+  }
+  
+  .havn-virtual-numbers-container .search-box input {
+    width: 100% !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-body {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 16px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-list {
+    height: 300px !important;
+    order: 1 !important;
+  }
+  
+  .havn-virtual-numbers-container .tabs {
+    justify-content: center !important;
+    margin: 16px !important;
+  }
+  
+  .havn-virtual-numbers-container .tab {
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+  }
+  
+  .havn-virtual-numbers-container .services-container {
+    padding: 12px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item {
+    padding: 12px !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    text-align: center !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-info {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-logo {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-name {
+    font-size: 16px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .view-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table-box {
+    order: 2 !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-filters {
+    display: none !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table {
+    padding: 0 12px 12px 12px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table .row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    text-align: right !important;
+    padding: 16px !important;
+    position: relative !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table .row .col:first-child {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table .row .col:nth-child(2) {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-weight: 600 !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table .row .col:nth-child(2)::before {
+    content: 'قیمت: ' !important;
+    color: #6b7280 !important;
+    font-weight: normal !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table .row .col:nth-child(3) {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-weight: 600 !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table .row .col:nth-child(3)::before {
+    content: 'موجودی: ' !important;
+    color: #6b7280 !important;
+    font-weight: normal !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table .row .col:last-child {
+    display: flex !important;
+    justify-content: center !important;
+    margin-top: 8px !important;
+  }
+  
+  .havn-virtual-numbers-container .btn {
+    width: 100% !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-footer {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+  
+  .havn-virtual-numbers-container .pagination-controls {
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+  
+  .havn-virtual-numbers-container .pagination-info {
+    font-size: 12px !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+  
+  .havn-virtual-numbers-container .btn.small {
+    padding: 0 !important;
+    font-size: 12px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+  }
+  
+  .havn-virtual-numbers-container .page-numbers {
+    max-width: 120px !important;
+    gap: 4px !important;
+  }
+  
+  .havn-virtual-numbers-container .page,
+  .havn-virtual-numbers-container .page-link {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .havn-virtual-numbers-container {
+    padding: 10px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-wrapper {
+    margin: 10px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-header {
+    padding: 16px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-title {
+    font-size: 20px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-body {
+    padding: 16px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item {
+    padding: 12px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .view-btn {
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-filters {
+    padding: 12px !important;
+    font-size: 12px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table .row {
+    padding: 12px !important;
+    font-size: 12px !important;
+  }
+  
+  .havn-virtual-numbers-container .btn {
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+    min-width: 80px !important;
+  }
+} 
