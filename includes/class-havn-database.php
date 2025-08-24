@@ -25,6 +25,9 @@ class HAVN_Database {
             service_id varchar(100) NOT NULL,
             country_code varchar(10) NOT NULL,
             price decimal(10,2) NOT NULL,
+            number_id varchar(255),
+            number varchar(50),
+            cost decimal(10,4),
             status varchar(50) NOT NULL DEFAULT 'pending',
             api_response longtext,
             admin_notes text,
@@ -34,31 +37,44 @@ class HAVN_Database {
             KEY user_id (user_id),
             KEY service_id (service_id),
             KEY status (status),
-            KEY created_at (created_at)
+            KEY created_at (created_at),
+            KEY number_id (number_id)
         ) $charset_collate;";
         
-        // Services cache table
-        $table_services = $wpdb->prefix . 'havn_services_cache';
+        // Services table
+        $table_services = $wpdb->prefix . 'havn_services';
         $sql_services = "CREATE TABLE $table_services (
             id bigint(20) NOT NULL AUTO_INCREMENT,
-            service_id varchar(100) NOT NULL,
-            service_data longtext NOT NULL,
-            countries_data longtext,
-            last_updated datetime NOT NULL,
+            service_short_name varchar(100) NOT NULL,
+            service_full_name varchar(255) NOT NULL,
+            service_icon varchar(255),
+            is_active tinyint(1) DEFAULT 1,
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
             PRIMARY KEY (id),
-            UNIQUE KEY service_id (service_id)
+            UNIQUE KEY service_short_name (service_short_name),
+            KEY is_active (is_active)
         ) $charset_collate;";
         
-        // Countries cache table
-        $table_countries = $wpdb->prefix . 'havn_countries_cache';
+        // Countries table
+        $table_countries = $wpdb->prefix . 'havn_countries';
         $sql_countries = "CREATE TABLE $table_countries (
             id bigint(20) NOT NULL AUTO_INCREMENT,
-            country_code varchar(10) NOT NULL,
-            country_name varchar(100) NOT NULL,
-            flag_url varchar(255),
-            last_updated datetime NOT NULL,
+            country_code varchar(100) NOT NULL,
+            country_iso_code varchar(10) NOT NULL,
+            country_name varchar(255) NOT NULL,
+            country_flag varchar(255),
+            count_available int(11) DEFAULT 0,
+            price_usd decimal(10,4) DEFAULT 0.0000,
+            rental_time int(11) DEFAULT 20,
+            is_active tinyint(1) DEFAULT 1,
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
             PRIMARY KEY (id),
-            UNIQUE KEY country_code (country_code)
+            UNIQUE KEY service_country (service_short_name, country_iso_code),
+            KEY service_short_name (service_short_name),
+            KEY country_iso_code (country_iso_code),
+            KEY is_active (is_active)
         ) $charset_collate;";
         
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -152,6 +168,27 @@ class HAVN_Database {
     }
     
     /**
+     * Get user purchases
+     */
+    public static function get_user_purchases($user_id, $status = null) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'havn_purchases';
+        
+        $where_clause = "WHERE user_id = %d";
+        $params = array($user_id);
+        
+        if ($status) {
+            $where_clause .= " AND status = %s";
+            $params[] = $status;
+        }
+        
+        $query = "SELECT * FROM $table_name $where_clause ORDER BY created_at DESC";
+        
+        return $wpdb->get_results($wpdb->prepare($query, $params));
+    }
+    
+    /**
      * Update purchase status
      */
     public static function update_purchase_status($purchase_id, $status, $admin_notes = '') {
@@ -217,52 +254,203 @@ class HAVN_Database {
     }
     
     /**
-     * Save service data to cache
+     * Save services data to database
      */
-    public static function cache_service_data($service_id, $service_data, $countries_data = null) {
+    public static function save_services_data($services_data) {
         global $wpdb;
         
-        $table_name = $wpdb->prefix . 'havn_services_cache';
+        $table_name = $wpdb->prefix . 'havn_services';
+        $base_path = $services_data['base_path'] ?? '';
         
-        $data = array(
-            'service_id' => $service_id,
-            'service_data' => json_encode($service_data),
-            'last_updated' => current_time('mysql')
-        );
+        // First, deactivate all services
+        $wpdb->update($table_name, array('is_active' => 0), array(), array('%d'), array());
         
-        if ($countries_data) {
-            $data['countries_data'] = json_encode($countries_data);
-        }
-        
-        return $wpdb->replace(
-            $table_name,
-            $data,
-            array('%s', '%s', '%s', '%s')
-        );
-    }
-    
-    /**
-     * Get cached service data
-     */
-    public static function get_cached_service_data($service_id) {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'havn_services_cache';
-        
-        $result = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_name WHERE service_id = %s",
-            $service_id
-        ));
-        
-        if ($result) {
-            $result->service_data = json_decode($result->service_data, true);
-            if ($result->countries_data) {
-                $result->countries_data = json_decode($result->countries_data, true);
+        if (isset($services_data['info']) && is_array($services_data['info'])) {
+            foreach ($services_data['info'] as $service) {
+                $data = array(
+                    'service_short_name' => $service['service_short_name'],
+                    'service_full_name' => $service['service_full_name'],
+                    'service_icon' => $service['service_icon'] ?? '',
+                    'base_path' => $base_path,
+                    'is_active' => 1,
+                    'updated_at' => current_time('mysql')
+                );
+                
+                // Check if service exists
+                $existing = $wpdb->get_row($wpdb->prepare(
+                    "SELECT id FROM $table_name WHERE service_short_name = %s",
+                    $service['service_short_name']
+                ));
+                
+                if ($existing) {
+                    // Update existing service
+                    $wpdb->update(
+                        $table_name,
+                        $data,
+                        array('service_short_name' => $service['service_short_name']),
+                        array('%s', '%s', '%s', '%s', '%d', '%s'),
+                        array('%s')
+                    );
+                } else {
+                    // Insert new service
+                    $data['created_at'] = current_time('mysql');
+                    $wpdb->insert(
+                        $table_name,
+                        $data,
+                        array('%s', '%s', '%s', '%s', '%d', '%s', '%s')
+                    );
+                }
             }
         }
         
-        return $result;
+        return true;
     }
+    
+    /**
+     * Save countries data to database
+     */
+    public static function save_countries_data($service_short_name, $countries_data) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'havn_countries';
+        $base_path = $countries_data['base_path'] ?? '';
+        $rental_time = $countries_data['rental_time'] ?? 20;
+        
+        // First, deactivate all countries for this service
+        $wpdb->update(
+            $table_name, 
+            array('is_active' => 0), 
+            array('service_short_name' => $service_short_name), 
+            array('%d'), 
+            array('%s')
+        );
+        
+        if (isset($countries_data['info']) && is_array($countries_data['info'])) {
+            foreach ($countries_data['info'] as $country) {
+                $country_info = $country['country_info'];
+                $data = array(
+                    'service_short_name' => $service_short_name,
+                    'country_iso_code' => $country_info['country_iso_code'],
+                    'country_name' => $country_info['country_name'],
+                    'country_flag' => $country_info['country_flag'] ?? '',
+                    'base_path' => $base_path,
+                    'count_available' => $country['count'] ?? 0,
+                    'price_usd' => $country['price'] ?? 0.0000,
+                    'rental_time' => $rental_time,
+                    'is_active' => 1,
+                    'updated_at' => current_time('mysql')
+                );
+                
+                // Check if country exists for this service
+                $existing = $wpdb->get_row($wpdb->prepare(
+                    "SELECT id FROM $table_name WHERE service_short_name = %s AND country_iso_code = %s",
+                    $service_short_name,
+                    $country_info['country_iso_code']
+                ));
+                
+                if ($existing) {
+                    // Update existing country
+                    $wpdb->update(
+                        $table_name,
+                        $data,
+                        array(
+                            'service_short_name' => $service_short_name,
+                            'country_iso_code' => $country_info['country_iso_code']
+                        ),
+                        array('%s', '%s', '%s', '%s', '%s', '%d', '%f', '%d', '%d', '%s'),
+                        array('%s', '%s')
+                    );
+                } else {
+                    // Insert new country
+                    $data['created_at'] = current_time('mysql');
+                    $wpdb->insert(
+                        $table_name,
+                        $data,
+                        array('%s', '%s', '%s', '%s', '%s', '%d', '%f', '%d', '%d', '%s', '%s')
+                    );
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get all active services from database
+     */
+    public static function get_services() {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'havn_services';
+        
+        $services = $wpdb->get_results(
+            "SELECT * FROM $table_name WHERE is_active = 1 ORDER BY service_full_name ASC"
+        );
+        
+        return $services;
+    }
+    
+    /**
+     * Get countries for a specific service from database
+     */
+    public static function get_service_countries($service_short_name) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'havn_countries';
+        
+        $countries = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM $table_name WHERE service_short_name = %s AND is_active = 1 ORDER BY country_name ASC",
+            $service_short_name
+        ));
+        
+        return $countries;
+    }
+    
+    /**
+     * Get service by short name
+     */
+    public static function get_service($service_short_name) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'havn_services';
+        
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_name WHERE service_short_name = %s AND is_active = 1",
+            $service_short_name
+        ));
+    }
+    
+    /**
+     * Get country by service and country code
+     */
+    public static function get_country($service_short_name, $country_iso_code) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'havn_countries';
+        
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_name WHERE service_short_name = %s AND country_iso_code = %s AND is_active = 1",
+            $service_short_name,
+            $country_iso_code
+        ));
+    }
+    
+    /**
+     * Get purchase by number ID and user ID
+     */
+    public static function get_purchase_by_number_id($number_id, $user_id) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'havn_purchases';
+        
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_name WHERE number_id = %s AND user_id = %d AND status = 'completed'",
+            $number_id,
+            $user_id
+        ));
+    }
+    
+
     
     /**
      * Clear expired cache

@@ -14,6 +14,7 @@ class HAVN_Admin {
         add_action('admin_init', array($this, 'init_settings'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_action('wp_ajax_havn_update_purchase_status', array($this, 'ajax_update_purchase_status'));
+        add_action('wp_ajax_havn_cancel_number', array($this, 'ajax_cancel_number'));
     }
     
     /**
@@ -56,6 +57,15 @@ class HAVN_Admin {
             'havn-settings',
             array($this, 'settings_page')
         );
+        
+        add_submenu_page(
+            'havn-virtual-numbers',
+            'تست سیستم',
+            'تست سیستم',
+            'manage_options',
+            'havn-test',
+            array($this, 'test_page')
+        );
     }
     
     /**
@@ -69,6 +79,8 @@ class HAVN_Admin {
         register_setting('havn_settings', 'havn_virtunum_api_url');
         register_setting('havn_settings', 'havn_page_title');
         register_setting('havn_settings', 'havn_info_text');
+        register_setting('havn_settings', 'havn_services_base_path');
+        register_setting('havn_settings', 'havn_countries_base_path');
         
         add_settings_section(
             'havn_general_settings',
@@ -132,6 +144,22 @@ class HAVN_Admin {
             'havn-settings',
             'havn_general_settings'
         );
+        
+        add_settings_field(
+            'havn_services_base_path',
+            'آدرس پایه لوگو سرویس‌ها',
+            array($this, 'services_base_path_field_callback'),
+            'havn-settings',
+            'havn_general_settings'
+        );
+        
+        add_settings_field(
+            'havn_countries_base_path',
+            'آدرس پایه پرچم کشورها',
+            array($this, 'countries_base_path_field_callback'),
+            'havn-settings',
+            'havn_general_settings'
+        );
     }
     
     /**
@@ -173,6 +201,13 @@ class HAVN_Admin {
      */
     public function settings_page() {
         include HAVN_PLUGIN_DIR . 'admin/views/settings.php';
+    }
+    
+    /**
+     * Test page
+     */
+    public function test_page() {
+        include HAVN_PLUGIN_DIR . 'frontend/views/test-menu.php';
     }
     
     /**
@@ -224,6 +259,18 @@ class HAVN_Admin {
         echo '<p class="description">متن اطلاعات که در مودال نمایش داده می‌شود</p>';
     }
     
+    public function services_base_path_field_callback() {
+        $value = get_option('havn_services_base_path', 'https://nerd-peek.ams3.cdn.digitaloceanspaces.com/Virtunum/services-logo');
+        echo '<input type="url" name="havn_services_base_path" value="' . esc_attr($value) . '" class="regular-text" />';
+        echo '<p class="description">آدرس پایه برای لوگو سرویس‌ها (بدون / در انتها)</p>';
+    }
+    
+    public function countries_base_path_field_callback() {
+        $value = get_option('havn_countries_base_path', 'https://nerd-peek.ams3.cdn.digitaloceanspaces.com/Virtunum/countries-flag');
+        echo '<input type="url" name="havn_countries_base_path" value="' . esc_attr($value) . '" class="regular-text" />';
+        echo '<p class="description">آدرس پایه برای پرچم کشورها (بدون / در انتها)</p>';
+    }
+    
     /**
      * AJAX handler for updating purchase status
      */
@@ -244,6 +291,32 @@ class HAVN_Admin {
             wp_send_json_success('وضعیت با موفقیت بروزرسانی شد');
         } else {
             wp_send_json_error('خطا در بروزرسانی وضعیت');
+        }
+    }
+    
+    /**
+     * AJAX handler for canceling number
+     */
+    public function ajax_cancel_number() {
+        check_ajax_referer('havn_cancel_number', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $number_id = sanitize_text_field($_POST['number_id']);
+        
+        if (empty($number_id)) {
+            wp_send_json_error('شناسه شماره الزامی است');
+        }
+        
+        $api = new HAVN_API();
+        $result = $api->cancel_number($number_id);
+        
+        if ($result['success']) {
+            wp_send_json_success($result['message']);
+        } else {
+            wp_send_json_error($result['message']);
         }
     }
 } 

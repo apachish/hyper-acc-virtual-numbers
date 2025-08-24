@@ -102,11 +102,11 @@ hyper-acc-virtual-numbers/
 - `created_at`: تاریخ ایجاد
 - `updated_at`: تاریخ بروزرسانی
 
-### `wp_havn_services_cache`
-- کش سرویس‌ها
+### `wp_havn_services`
+-  اطلاعات سرویس خرید شده
 
-### `wp_havn_countries_cache`
-- کش کشورها
+### `wp_havn_countries`
+-  اطلاعات کشور خرید شده
 
 ## اتصال به TeraWallet
 

@@ -2,6 +2,34 @@
  * Frontend JavaScript
  */
 
+// Initialize services page
+window.initServicesPage = function() {
+    console.log('Initializing services page...');
+    
+    // Get data from PHP
+    if (window.allServices) {
+        allServices = window.allServices;
+    }
+    if (window.perPage) {
+        perPage = window.perPage;
+    }
+    if (window.basePath) {
+        basePath = window.basePath;
+    }
+    if (window.havnUsdRate) {
+        havnUsdRate = window.havnUsdRate;
+    }
+    if (window.havnProfitMargin) {
+        havnProfitMargin = window.havnProfitMargin;
+    }
+    
+    // Initialize the page
+    renderServicesPage(allServices.slice(0, perPage), 1);
+    attachSearchListeners();
+    
+    console.log('Services page initialized successfully');
+};
+
 jQuery(document).ready(function($) {
 
     // Initialize frontend functionality
@@ -117,59 +145,6 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // Handle purchase confirmation
-    $(document).on('click', '#confirm-purchase', function() {
-        var button = $(this);
-        var originalText = button.text();
-
-        // Show loading state
-        button.prop('disabled', true).text('در حال پردازش...');
-
-        // Get purchase details
-        var purchaseData = window.currentPurchase;
-
-        if (!purchaseData || !purchaseData.serviceId || !purchaseData.countryCode) {
-            showPurchaseError('اطلاعات خرید ناقص است');
-            button.prop('disabled', false).text(originalText);
-            return;
-        }
-
-        // Send purchase request
-        var formData = new FormData();
-        formData.append('action', 'havn_purchase_number');
-        formData.append('nonce', havn_ajax.nonce);
-        formData.append('service_id', purchaseData.serviceId);
-        formData.append('country_code', purchaseData.countryCode);
-
-        $.ajax({
-            url: havn_ajax.ajax_url,
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    showPurchaseSuccess('شماره با موفقیت خریداری شد!');
-
-                    // Close modal after delay
-                    setTimeout(function() {
-                        $('#havn-purchase-modal').hide();
-                        location.reload();
-                    }, 2000);
-                } else {
-                    showPurchaseError('خطا: ' + response.data);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Purchase error:', error);
-                showPurchaseError('خطا در ارتباط با سرور');
-            },
-            complete: function() {
-                button.prop('disabled', false).text(originalText);
-            }
-        });
-    });
-
     function showPurchaseSuccess(message) {
         var resultDiv = $('#purchase-result');
         resultDiv.html('<div class="success-message">' + message + '</div>').show();
@@ -179,21 +154,6 @@ jQuery(document).ready(function($) {
         var resultDiv = $('#purchase-result');
         resultDiv.html('<div class="error-message">' + message + '</div>').show();
     }
-
-    // Handle service refresh
-    $(document).on('click', '.havn-refresh-services', function(e) {
-        e.preventDefault();
-
-        var button = $(this);
-        var originalText = button.text();
-
-        button.prop('disabled', true).text('در حال بروزرسانی...');
-
-        // Reload page to refresh services
-        setTimeout(function() {
-            location.reload();
-        }, 1000);
-    });
 
     // Handle country flag loading errors
     $(document).on('error', '.country-flag', function() {
@@ -275,7 +235,7 @@ jQuery(document).ready(function($) {
     });
 
     // Initialize tooltips and other UI enhancements
-    $('[data-tooltip]').tooltip();
+    // $('[data-tooltip]').tooltip(); // Removed - tooltip not available
 
     // Handle responsive table
     $('.havn-responsive-table').on('click', '.havn-toggle-details', function() {
@@ -414,39 +374,444 @@ jQuery(document).ready(function($) {
     }
 });
 
-// Global function for purchasing numbers (called from HTML)
-function havnPurchaseNumber(serviceId, countryCode) {
-    if (!havn_ajax || !havn_ajax.is_logged_in) {
-        alert('لطفاً ابتدا وارد شوید');
+
+
+
+
+// Open info modal
+function openModal() {
+    const modal = document.getElementById('info-modal');
+    modal.style.setProperty('display', 'flex', 'important');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close info modal
+function closeModal() {
+    const modal = document.getElementById('info-modal');
+    modal.style.setProperty('display', 'none', 'important');
+    document.body.style.overflow = 'auto';
+}
+
+// Global variables
+let allServices = document.getElementById('all_services_json').value;
+
+let currentPage = 1;
+let perPage = 20;
+let basePath = document.getElementById('base_path_js').value;
+let currentService = null;
+
+// Render services page
+function renderServicesPage(services, page) {
+    currentPage = page;
+    const container = document.getElementById('services-container');
+    let html = '';
+
+    if (services.length === 0) {
+        html = '<div style="text-align: center; padding: 40px; color: #6b7280;">هیچ سرویسی یافت نشد</div>';
+    } else {
+        services.forEach(service => {
+            const serviceName = service.service_full_name || service.name || service.id || '';
+            const serviceIcon = service.service_icon || '';
+            const logoUrl = serviceIcon ? (basePath + serviceIcon) : '';
+
+            html += `
+          <div class="list-item" onclick="selectService('${service.service_short_name}')">
+            <div class="service-info">
+              <img src="${logoUrl}" alt="${serviceName}" class="service-logo" onerror="this.style.display='none'">
+              <div class="service-details">
+                <div class="service-name">${serviceName}</div>
+                <div class="service-status">سرویس فعال</div>
+              </div>
+            </div>
+            <button class="view-btn" onclick="event.stopPropagation(); viewService('${service.service_short_name}')">
+              مشاهده 👁
+            </button>
+          </div>
+        `;
+        });
+    }
+
+    container.innerHTML = html;
+    generatePaginationHTML(page);
+    updatePaginationInfo(page);
+}
+
+// Generate pagination HTML
+function generatePaginationHTML(page) {
+    const totalPages = Math.ceil(allServices.length / perPage);
+    const pageNumbers = document.getElementById('page-numbers');
+    let html = '';
+
+    // Show only 3 page numbers maximum
+    let startPage = Math.max(1, page - 1);
+    let endPage = Math.min(totalPages, page + 1);
+
+    // Adjust if we're at the beginning or end
+    if (page <= 2) {
+        startPage = 1;
+        endPage = Math.min(3, totalPages);
+    } else if (page >= totalPages - 1) {
+        startPage = Math.max(1, totalPages - 2);
+        endPage = totalPages;
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const isCurrent = i === page;
+        html += `<button class="page ${isCurrent ? 'current' : ''}" onclick="changePage(${i})" style="
+        background: ${isCurrent ? '#FC5A44' : '#ffffff'} !important;
+        color: ${isCurrent ? '#ffffff' : '#6b7280'} !important;
+        border: 2px solid ${isCurrent ? '#FC5A44' : '#e5e7eb'} !important;
+        box-shadow: ${isCurrent ? '0 2px 8px rgba(252, 90, 68, 0.3)' : 'none'} !important;
+        font-weight: ${isCurrent ? '600' : '500'} !important;
+      ">${i}</button>`;
+    }
+    pageNumbers.innerHTML = html;
+
+    // Update prev/next buttons
+    document.getElementById('prev-page').disabled = page <= 1;
+    document.getElementById('next-page').disabled = page >= totalPages;
+}
+
+// Update pagination info
+function updatePaginationInfo(page) {
+    const start = (page - 1) * perPage + 1;
+    const end = Math.min(page * perPage, allServices.length);
+    const info = document.getElementById('pagination-info');
+    info.innerHTML = `نمایش ${start} تا ${end}از ${allServices.length} سرویس`;
+}
+
+// Change page
+function changePage(page) {
+    const totalPages = Math.ceil(allServices.length / perPage);
+    if (page < 1 || page > totalPages) return;
+
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+    const services = allServices.slice(start, end);
+
+    renderServicesPage(services, page);
+    window.history.pushState({}, '', `?page=${page}`);
+}
+
+// Select service
+function selectService(serviceShortName) {
+    const items = document.querySelectorAll('.list-item');
+    items.forEach(item => item.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    currentService = serviceShortName;
+}
+
+// View service countries
+function viewService(serviceShortName) {
+    currentService = serviceShortName;
+
+    // Show loading
+    document.getElementById('countries-table').innerHTML = `
+      <div class="row">
+        <div class="col" style="grid-column: 1 / -1; text-align: center; color: #FC5A44; padding: 40px 20px;">
+          <div style="font-size: 16px; margin-bottom: 8px;">⏳</div>
+          در حال بارگذاری کشورها...
+        </div>
+      </div>
+    `;
+
+    // Make AJAX request
+    fetch(havn_ajax.ajax_url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=havn_get_service_countries&service_id=${serviceShortName}&nonce=${havn_ajax.nonce}`
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderCountries(data.data, serviceShortName);
+            } else {
+                document.getElementById('countries-table').innerHTML = `
+          <div class="row">
+            <div class="col" style="grid-column: 1 / -1; text-align: center; color: #FC5A44; padding: 40px 20px;">
+              <div style="font-size: 16px; margin-bottom: 8px;">❌</div>
+              خطا در بارگذاری کشورها: ${data.data || 'خطای نامشخص'}
+            </div>
+          </div>
+        `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('countries-table').innerHTML = `
+        <div class="row">
+          <div class="col" style="grid-column: 1 / -1; text-align: center; color: #FC5A44; padding: 40px 20px;">
+            <div style="font-size: 16px; margin-bottom: 8px;">❌</div>
+            خطا در ارتباط با سرور
+          </div>
+        </div>
+      `;
+        });
+}
+
+// Render countries
+function renderCountries(data, serviceId) {
+    let html = '';
+
+    if (data && data.info && data.info.length > 0) {
+        data.info.forEach(c => {
+            const countryInfo = c.country_info || {};
+            const name = countryInfo.country_name || '';
+            const code = countryInfo.country_iso_code || '';
+            const flag = countryInfo.country_flag || '';
+            const price = c.price || 0;
+            const stock = c.count || 0;
+            const disabled = stock <= 0;
+
+            // Convert price to Tomans with profit margin
+            const usdRate = document.getElementById('havn_usd_rate').value;
+            const profitMargin = document.getElementById('havn_profit_margin').value;
+            const finalPrice = price * usdRate * (1 + profitMargin / 100);
+
+            // Build flag URL
+            const flagUrl = flag ?
+                (flag.startsWith('http') ? flag : 'https://nerd-peek.ams3.cdn.digitaloceanspaces.com/Virtunum/countries-flag' + flag) :
+                '';
+
+            html += `
+          <div class="row${disabled ? ' disabled' : ''}">
+            <div class="col">
+              ${flagUrl ? `<img src="${flagUrl}" alt="${name}" class="country-flag" onerror="this.style.display='none'">` : ''}
+              <span>${name}</span>
+            </div>
+            <div class="col">${new Intl.NumberFormat('fa-IR').format(Math.round(finalPrice))} تومان</div>
+            <div class="col">${new Intl.NumberFormat('fa-IR').format(stock)} عدد</div>
+            <div class="col">
+              ${disabled ?
+                '<button class="btn disabled" disabled>غیرفعال</button>' :
+                '<button class="btn" onclick="event.stopPropagation(); havnPurchaseNumber(\''+serviceId+'\', \''+code+'\')">دریافت</button>'
+            }
+            </div>
+          </div>
+        `;
+        });
+    } else {
+        html = `
+        <div class="row">
+          <div class="col" style="grid-column: 1 / -1; text-align: center; color: #FC5A44; padding: 40px 20px;">
+            <div style="font-size: 16px; margin-bottom: 8px;">📭</div>
+            هیچ کشوری برای این سرویس موجود نیست
+          </div>
+        </div>
+      `;
+    }
+
+    document.getElementById('countries-table').innerHTML = html;
+}
+
+// Search functionality
+const searchInput = document.getElementById('havn-services-search');
+const searchResultsInfo = document.getElementById('search-results-info');
+const searchResultsText = document.getElementById('search-results-text');
+const clearSearchBtn = document.getElementById('clear-search');
+let searchQuery = '';
+
+function attachSearchListeners() {
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            searchQuery = this.value.trim().toLowerCase();
+            performSearch();
+        });
+    }
+
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            searchQuery = '';
+            performSearch();
+        });
+    }
+}
+
+function performSearch() {
+    if (!searchQuery && allServices) {
+        renderServicesPage(allServices.slice((currentPage - 1) * perPage, currentPage * perPage), currentPage);
+        searchResultsInfo.classList.remove('show');
         return;
     }
 
-    // Show purchase confirmation
-    if (confirm('آیا از خرید این شماره اطمینان دارید؟')) {
-        // Send purchase request
-        const formData = new FormData();
-        formData.append('action', 'havn_purchase_number');
-        formData.append('nonce', havn_ajax.nonce);
-        formData.append('service_id', serviceId);
-        formData.append('country_code', countryCode);
+    const filteredServices = allServices.filter(function(service) {
+        const serviceName = (service.service_full_name || service.name || service.id || '').toLowerCase();
+        return serviceName.indexOf(searchQuery) !== -1;
+    });
 
-        fetch(havn_ajax.ajax_url, {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('شماره با موفقیت خریداری شد!');
-                    // Optionally refresh the page or update UI
-                    location.reload();
-                } else {
-                    alert('خطا: ' + data.data);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('خطا در ارتباط با سرور');
-            });
+    if (filteredServices.length > 0) {
+        renderSearchResults(filteredServices);
+        searchResultsText.textContent = `${filteredServices.length} نتیجه برای "${searchQuery}" یافت شد`;
+        searchResultsInfo.classList.add('show');
+    } else {
+        renderSearchResults([]);
+        searchResultsText.textContent = `هیچ نتیجه‌ای برای "${searchQuery}" یافت نشد`;
+        searchResultsInfo.classList.add('show');
     }
+}
+
+function renderSearchResults(filteredServices) {
+    const container = document.getElementById('services-container');
+    let html = '';
+
+    if (filteredServices.length === 0) {
+        html = '<div style="text-align: center; padding: 40px; color: #6b7280;">هیچ سرویسی یافت نشد</div>';
+    } else {
+        filteredServices.forEach(service => {
+            const serviceName = service.service_full_name || service.name || service.id || '';
+            const serviceIcon = service.service_icon || '';
+            const logoUrl = serviceIcon ? (basePath + serviceIcon) : '';
+
+            html += `
+          <div class="list-item" onclick="selectService('${service.service_short_name}')">
+            <div class="service-info">
+              <img src="${logoUrl}" alt="${serviceName}" class="service-logo" onerror="this.style.display='none'">
+              <div class="service-details">
+                <div class="service-name">${serviceName}</div>
+                <div class="service-status">سرویس فعال</div>
+              </div>
+            </div>
+            <button class="view-btn" onclick="event.stopPropagation(); viewService('${service.service_short_name}')">
+              مشاهده 👁
+            </button>
+          </div>
+        `;
+        });
+    }
+
+    container.innerHTML = html;
+    attachSearchListeners();
+}
+
+// Purchase number function
+function havnPurchaseNumber(serviceId, countryCode) {
+    // Check if user is logged in
+    if (!havn_ajax.is_logged_in || havn_ajax.user_id === '0') {
+        showErrorModal('لطفاً ابتدا وارد شوید');
+        return;
+    }
+
+    // Show confirmation modal
+    showPurchaseConfirmation(serviceId, countryCode);
+}
+
+// Show purchase confirmation modal
+function showPurchaseConfirmation(serviceId, countryCode) {
+    const modal = document.getElementById('purchase-confirmation-modal');
+
+    if (!modal) {
+        alert('خطا در نمایش مودال تأیید');
+        return;
+    }
+
+    // Store data for later use
+    modal.dataset.serviceId = serviceId;
+    modal.dataset.countryCode = countryCode;
+
+    // Show modal
+    modal.style.setProperty('display', 'flex', 'important');
+    document.body.style.overflow = 'hidden';
+}
+
+// Confirm purchase
+function confirmPurchase() {
+    const modal = document.getElementById('purchase-confirmation-modal');
+    const serviceId = modal.dataset.serviceId;
+    const countryCode = modal.dataset.countryCode;
+
+    // Hide modal
+    modal.style.setProperty('display', 'none', 'important');
+    document.body.style.overflow = 'auto';
+
+    // Show loading
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = 'در حال پردازش...';
+    button.disabled = true;
+
+    // Make AJAX request to purchase number
+    fetch(havn_ajax.ajax_url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            action: 'havn_purchase_number',
+            service_id: serviceId,
+            country_code: countryCode,
+            nonce: havn_ajax.nonce
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessModal('شماره با موفقیت خریداری شد!');
+                // Refresh the countries list
+                viewService(serviceId);
+            } else {
+                showErrorModal('خطا: ' + (data.data || 'خطا در خرید شماره'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorModal('خطا در ارتباط با سرور');
+        })
+        .finally(() => {
+            // Restore button
+            button.textContent = originalText;
+            button.disabled = false;
+        });
+}
+
+// Cancel purchase
+function cancelPurchase() {
+    const modal = document.getElementById('purchase-confirmation-modal');
+    modal.style.setProperty('display', 'none', 'important');
+    document.body.style.overflow = 'auto';
+}
+
+// Show success modal
+function showSuccessModal(message) {
+    const modal = document.getElementById('success-modal');
+    const messageEl = document.getElementById('success-message');
+
+    if (!modal || !messageEl) {
+        alert(message);
+        return;
+    }
+
+    messageEl.textContent = message;
+    modal.style.setProperty('display', 'flex', 'important');
+    document.body.style.overflow = 'hidden';
+}
+
+// Show error modal
+function showErrorModal(message) {
+    const modal = document.getElementById('error-modal');
+    const messageEl = document.getElementById('error-message');
+
+    if (!modal || !messageEl) {
+        alert(message);
+        return;
+    }
+
+    messageEl.textContent = message;
+    modal.style.setProperty('display', 'flex', 'important');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close success modal
+function closeSuccessModal() {
+    const modal = document.getElementById('success-modal');
+    modal.style.setProperty('display', 'none', 'important');
+    document.body.style.overflow = 'auto';
+}
+
+// Close error modal
+function closeErrorModal() {
+    const modal = document.getElementById('error-modal');
+    modal.style.setProperty('display', 'none', 'important');
+    document.body.style.overflow = 'auto';
 }

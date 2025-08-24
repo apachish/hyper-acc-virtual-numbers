@@ -52,6 +52,12 @@ class HyperAccVirtualNumbers {
     public function init() {
         // Initialize plugin components
         $this->load_dependencies();
+        
+        // Run migrations
+        if (class_exists('HAVN_Migration')) {
+            HAVN_Migration::run_migrations();
+        }
+        
         $this->init_admin();
         $this->init_frontend();
         
@@ -69,6 +75,7 @@ class HyperAccVirtualNumbers {
         require_once HAVN_PLUGIN_DIR . 'includes/class-havn-admin.php';
         require_once HAVN_PLUGIN_DIR . 'includes/class-havn-frontend.php';
         require_once HAVN_PLUGIN_DIR . 'includes/class-havn-database.php';
+        require_once HAVN_PLUGIN_DIR . 'includes/class-havn-migration.php';
     }
     
     private function init_admin() {
@@ -89,6 +96,11 @@ class HyperAccVirtualNumbers {
             // Create database tables
             if (class_exists('HAVN_Database')) {
                 HAVN_Database::create_tables();
+            }
+            
+            // Run migrations
+            if (class_exists('HAVN_Migration')) {
+                HAVN_Migration::run_migrations();
             }
             
             // Set default options
