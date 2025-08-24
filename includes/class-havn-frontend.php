@@ -135,7 +135,7 @@ class HAVN_Frontend {
             if (isset($country['country_info']) && $country['country_info']['country_iso_code'] === $country_code) {
                 $service_price = $country['price'];
                 $api->save_service_record($service_id);
-                $api->save_country_record($country);
+                $api->save_country_record($country,$service_id);
                 break;
             }
         }

@@ -194,19 +194,26 @@ $purchases = HAVN_Database::get_purchases($filters);
                                     $logo_url = '';
                                     
                                     if ($service && $service->service_icon) {
-                                        $logo_url = $service->base_path . $service->service_icon;
+                                        $logo_url = get_option('havn_services_base_path', '') . $service->service_icon;
+                                    }
+                                    ?>
+                                    
+                                    <?php 
+                                    $service_name = $purchase->service_id; // fallback
+                                    if ($service && $service->service_full_name) {
+                                        $service_name = $service->service_full_name;
                                     }
                                     ?>
                                     
                                     <?php if ($logo_url): ?>
                                         <img src="<?php echo esc_url($logo_url); ?>" 
-                                             alt="<?php echo esc_attr($purchase->service_name ?: $purchase->service_id); ?>" 
+                                             alt="<?php echo esc_attr($service_name); ?>" 
                                              class="havn-service-logo"
                                              onerror="this.style.display='none';">
                                     <?php endif; ?>
                                     
                                     <div class="havn-cell-content">
-                                        <strong><?php echo esc_html($purchase->service_name ?: $purchase->service_id); ?></strong>
+                                        <strong><?php echo esc_html($service_name); ?></strong>
                                         <small><?php echo esc_html($purchase->service_id); ?></small>
                                     </div>
                                 </div>
@@ -219,19 +226,26 @@ $purchases = HAVN_Database::get_purchases($filters);
                                     $flag_url = '';
                                     
                                     if ($country && $country->country_flag) {
-                                        $flag_url = $country->base_path . $country->country_flag;
+                                        $flag_url = get_option('havn_countries_base_path', '') . $country->country_flag;
+                                    }
+                                    ?>
+                                    
+                                    <?php 
+                                    $country_name = $purchase->country_code; // fallback
+                                    if ($country && $country->country_name) {
+                                        $country_name = $country->country_name;
                                     }
                                     ?>
                                     
                                     <?php if ($flag_url): ?>
                                         <img src="<?php echo esc_url($flag_url); ?>" 
-                                             alt="<?php echo esc_attr($purchase->country_name ?: $purchase->country_code); ?>" 
+                                             alt="<?php echo esc_attr($country_name); ?>" 
                                              class="havn-country-flag"
                                              onerror="this.style.display='none';">
                                     <?php endif; ?>
                                     
                                     <div class="havn-cell-content">
-                                        <strong><?php echo esc_html($purchase->country_name ?: $purchase->country_code); ?></strong>
+                                        <strong><?php echo esc_html($country_name); ?></strong>
                                         <small><?php echo esc_html($purchase->country_code); ?></small>
                                     </div>
                                 </div>
@@ -245,31 +259,26 @@ $purchases = HAVN_Database::get_purchases($filters);
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <?php if ($purchase->number_id): ?>
-                                    <?php 
-                                    $api = new HAVN_API();
-                                    $number_status = $api->get_number_status($purchase->number_id);
-                                    $status_text = 'نامشخص';
-                                    $status_class = 'unknown';
-                                    
-                                    if (isset($number_status['state'])) {
-                                        $status_text = $number_status['state'];
+                                <?php if ($purchase->status_number): ?>
+                                    <?php
+                                        $status_text = $purchase->status_number;
                                         switch ($status_text) {
                                             case 'ACTIVE':
                                                 $status_class = 'active';
                                                 $status_text = 'فعال';
                                                 break;
-                                            case 'CANCELED':
+                                            case 'REFUNDED':
                                                 $status_class = 'canceled';
-                                                $status_text = 'لغو شده';
+                                                $status_text = 'لغو سیستمی';
                                                 break;
-                                            case 'EXPIRED':
+                                            case 'PENDING':
                                                 $status_class = 'expired';
-                                                $status_text = 'منقضی شده';
+                                                $status_text = 'در انتظار کد';
                                                 break;
                                             default:
+                                                $status_text = 'نامشخص';
                                                 $status_class = 'unknown';
-                                        }
+
                                     }
                                     ?>
                                     <span class="number-status-badge status-<?php echo $status_class; ?>">
@@ -282,9 +291,9 @@ $purchases = HAVN_Database::get_purchases($filters);
                             <td>
                                 <?php if ($purchase->number_id): ?>
                                     <?php 
-                                    $number_codes = $api->get_number_codes($purchase->number_id);
-                                    if (isset($number_codes['codes']) && is_array($number_codes['codes']) && !empty($number_codes['codes'])) {
-                                        $latest_code = end($number_codes['codes']);
+                                    $number_codes = $purchase->code;
+                                    if (isset($number_codes['codes']) && is_array($number_codes['code']) && !empty($number_codes['code'])) {
+                                        $latest_code = end($number_codes['code']);
                                         echo '<strong>' . esc_html($latest_code['code']) . '</strong>';
                                         if (isset($latest_code['time'])) {
                                             echo '<br><small>' . esc_html($latest_code['time']) . '</small>';
@@ -312,10 +321,9 @@ $purchases = HAVN_Database::get_purchases($filters);
                             </td>
                             <td><?php echo esc_html($purchase->created_at); ?></td>
                             <td>
-                                <button class="button button-small" onclick="havnViewDetails(<?php echo $purchase->id; ?>)">جزئیات</button>
-                                <button class="button button-small" onclick="havnChangeStatus(<?php echo $purchase->id; ?>)">تغییر وضعیت</button>
-                                <?php if ($purchase->number_id && $purchase->status === 'completed'): ?>
-                                    <button class="button button-small button-secondary" onclick="havnCancelNumber('<?php echo esc_js($purchase->number_id); ?>', '<?php echo esc_js($purchase->number); ?>')">لغو شماره</button>
+                                <?php if ($purchase->number_id && $purchase->status_number !== 'CANCELED'): ?>
+                                    <button class="button button-small" onclick="havnGetCodes('<?php echo esc_js($purchase->number_id); ?>', '<?php echo esc_js($purchase->number); ?>')">دریافت کد</button>
+                                    <button class="button button-small button-secondary" onclick="havnCancelNumber('<?php echo esc_js($purchase->number_id); ?>', '<?php echo esc_js($purchase->number); ?>')" id="cancel-btn-<?php echo esc_attr($purchase->number_id); ?>">لغو شماره</button>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -332,54 +340,62 @@ $purchases = HAVN_Database::get_purchases($filters);
 <div id="havn-purchase-modal" class="havn-modal" style="display: none;">
     <div class="havn-modal-content">
         <span class="havn-modal-close">&times;</span>
-        <h2>جزئیات درخواست</h2>
+        <h2>کدهای دریافتی</h2>
         <div id="havn-purchase-details"></div>
     </div>
 </div>
 
-<!-- Change Status Modal -->
-<div id="havn-status-modal" class="havn-modal" style="display: none;">
-    <div class="havn-modal-content">
-        <span class="havn-modal-close">&times;</span>
-        <h2>تغییر وضعیت</h2>
-        <form id="havn-status-form">
-            <input type="hidden" id="havn-purchase-id" name="purchase_id">
-            
-            <p>
-                <label for="havn-status">وضعیت جدید:</label>
-                <select id="havn-status" name="status" required>
-                    <option value="pending">در انتظار</option>
-                    <option value="processing">در حال پردازش</option>
-                    <option value="completed">تکمیل شده</option>
-                    <option value="cancelled">لغو شده</option>
-                    <option value="failed">ناموفق</option>
-                </select>
-            </p>
-            
-            <p>
-                <label for="havn-admin-notes">یادداشت ادمین:</label>
-                <textarea id="havn-admin-notes" name="admin_notes" rows="4" class="large-text"></textarea>
-            </p>
-            
-            <p>
-                <button type="submit" class="button button-primary">بروزرسانی</button>
-                <button type="button" class="button" onclick="havnCloseModal('havn-status-modal')">انصراف</button>
-            </p>
-        </form>
-    </div>
-</div>
+
 
 <script>
-function havnViewDetails(purchaseId) {
-    // TODO: Implement AJAX call to get purchase details
-    document.getElementById('havn-purchase-details').innerHTML = 'در حال بارگذاری...';
-    document.getElementById('havn-purchase-modal').style.display = 'block';
+function havnGetCodes(numberId, number) {
+    // Show loading
+    const button = event.target;
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = 'در حال دریافت...';
+    
+    // Send AJAX request
+    fetch(ajaxurl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            action: 'havn_get_codes',
+            nonce: '<?php echo wp_create_nonce('havn_get_codes'); ?>',
+            number_id: numberId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        button.disabled = false;
+        button.textContent = originalText;
+        
+        if (data.success) {
+            // Show codes in modal
+            document.getElementById('havn-purchase-details').innerHTML = 
+                '<h3>کدهای دریافتی برای شماره: ' + number + '</h3>' +
+                '<div class="codes-list">' + data.data + '</div>';
+            document.getElementById('havn-purchase-modal').style.display = 'block';
+            
+            // Hide cancel button if codes were received
+            const cancelBtn = document.getElementById('cancel-btn-' + numberId);
+            if (cancelBtn) {
+                cancelBtn.style.display = 'none';
+            }
+        } else {
+            alert('خطا: ' + data.message);
+        }
+    })
+    .catch(error => {
+        button.disabled = false;
+        button.textContent = originalText;
+        alert('خطا در ارتباط با سرور');
+    });
 }
 
-function havnChangeStatus(purchaseId) {
-    document.getElementById('havn-purchase-id').value = purchaseId;
-    document.getElementById('havn-status-modal').style.display = 'block';
-}
+
 
 function havnCloseModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
@@ -408,8 +424,26 @@ function havnCancelNumber(numberId, number) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('شماره با موفقیت لغو شد');
-                location.reload(); // Refresh page to update status
+                alert('عملیات موفق: ' + data.data);
+                
+                // Hide the cancel and get codes buttons
+                const row = button.closest('tr');
+                const buttonsCell = row.querySelector('td:last-child');
+                if (buttonsCell) {
+                    // Remove all buttons
+                    const buttons = buttonsCell.querySelectorAll('button');
+                    buttons.forEach(btn => {
+                        if (btn.textContent.includes('لغو') || btn.textContent.includes('دریافت کد')) {
+                            btn.style.display = 'none';
+                        }
+                    });
+                }
+                
+                // Update status in the table
+                const statusCell = row.querySelector('td:nth-child(5)'); // Status column
+                if (statusCell) {
+                    statusCell.innerHTML = '<span class="number-status-badge status-canceled">لغو شده</span>';
+                }
             } else {
                 alert('خطا: ' + data.data);
             }

@@ -15,6 +15,7 @@ class HAVN_Admin {
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_action('wp_ajax_havn_update_purchase_status', array($this, 'ajax_update_purchase_status'));
         add_action('wp_ajax_havn_cancel_number', array($this, 'ajax_cancel_number'));
+        add_action('wp_ajax_havn_get_codes', array($this, 'ajax_get_codes'));
     }
     
     /**
@@ -310,13 +311,103 @@ class HAVN_Admin {
             wp_send_json_error('شناسه شماره الزامی است');
         }
         
+        // Get purchase details to refund the user
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'havn_purchases';
+        $purchase = $wpdb->get_row($wpdb->prepare("SELECT user_id, price FROM $table_name WHERE number_id = %s", $number_id));
+        
+        if (!$purchase) {
+            wp_send_json_error('رکورد خرید یافت نشد');
+        }
+        
         $api = new HAVN_API();
         $result = $api->cancel_number($number_id);
         
         if ($result['success']) {
-            wp_send_json_success($result['message']);
+            // Refund the user's money
+            $refund_ok = $api->refund_user_balance($purchase->user_id, $purchase->price, '', '', 'لغو شماره توسط ادمین');
+            
+            // Update status in database
+            $wpdb->update(
+                $table_name,
+                array(
+                    'status_number' => 'CANCELED',
+                    'updated_at' => current_time('mysql')
+                ),
+                array('number_id' => $number_id),
+                array('%s', '%s'),
+                array('%s')
+            );
+            
+            $message = $result['message'];
+            if ($refund_ok) {
+                $message .= ' - پول به حساب کاربر برگشت';
+            } else {
+                $message .= ' - خطا در بازگشت پول';
+            }
+            
+            wp_send_json_success($message);
         } else {
             wp_send_json_error($result['message']);
+        }
+    }
+    
+    /**
+     * AJAX handler for getting number codes
+     */
+    public function ajax_get_codes() {
+        check_ajax_referer('havn_get_codes', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $number_id = sanitize_text_field($_POST['number_id']);
+        
+        if (empty($number_id)) {
+            wp_send_json_error('شناسه شماره الزامی است');
+        }
+        
+        // First try to get codes from database
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'havn_purchases';
+        $purchase = $wpdb->get_row($wpdb->prepare("SELECT code FROM $table_name WHERE number_id = %s", $number_id));
+        
+        if ($purchase) {
+            // If not in database, get from API
+            $api = new HAVN_API();
+            $codes = $api->get_number_codes($number_id);
+            error_log(print_r($codes, true));
+        }
+
+
+        if (!empty($codes) && isset($codes['code'])) {
+            // Format codes for display
+            $html = '<table class="wp-list-table widefat fixed striped">';
+            $html .= '<thead><tr><th>کد</th><th>زمان دریافت</th><th>وضعیت</th></tr></thead>';
+            $html .= '<tbody>';
+            
+            if (is_array($codes['code'])) {
+                foreach ($codes['code'] as $code) {
+                    $html .= '<tr>';
+                    $html .= '<td>' . esc_html($code['code']) . '</td>';
+                    $html .= '<td>' . esc_html($code['received_at'] ?? 'نامشخص') . '</td>';
+                    $html .= '<td><span class="status-badge status-received">دریافت شده</span></td>';
+                    $html .= '</tr>';
+                }
+            } else {
+                $html .= '<tr>';
+                $html .= '<td>' . esc_html($codes['code']) . '</td>';
+                $html .= '<td>' . esc_html($codes['received_at'] ?? 'نامشخص') . '</td>';
+                $html .= '<td><span class="status-badge status-received">دریافت شده</span></td>';
+                $html .= '</tr>';
+            }
+            
+            $html .= '</tbody></table>';
+            
+            wp_send_json_success($html);
+        } else {
+            wp_send_json_error('هیچ کدی یافت نشد');
         }
     }
 } 

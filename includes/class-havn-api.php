@@ -30,7 +30,7 @@ class HAVN_API {
 		);
 	}
 
-    private function get_curl($url,$cache_key)
+    private function get_curl($url, $cache_key, $method = 'GET', $post_data = null)
     {
         // For testing purposes, return mock data if API is not configured
         if (empty($this->api_key) || empty($this->api_url)) {
@@ -38,21 +38,27 @@ class HAVN_API {
         }
 
         $cached_data = null;
-        if($cache_key)
+        if($cache_key && $method === 'GET')
             $cached_data = get_transient($cache_key);
 
-
-
-        if ($cache_key && $cached_data !== false) {
+        if ($cache_key && $cached_data !== false && $method === 'GET') {
             return $cached_data;
         }
-        $response = wp_remote_get($this->api_url . $url, array(
+
+        $request_args = array(
             'headers' => array(
                 'Authorization' => 'Basic ' . $this->api_key,
                 'Content-Type' => 'application/json'
             ),
             'timeout' => 30
-        ));
+        );
+
+        if ($method === 'POST' && $post_data !== null) {
+            $request_args['method'] = 'POST';
+            $request_args['body'] = json_encode($post_data);
+        }
+
+        $response = wp_remote_request($this->api_url . $url, $request_args);
 
         if (is_wp_error($response)) {
             return [];
@@ -61,13 +67,12 @@ class HAVN_API {
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
-
-        if ($data) {
+        if ($data && $method === 'GET') {
             set_transient($cache_key, $data, $this->cache_duration);
             return $data;
         }
 
-        return [];
+        return $data ?: [];
     }
 	
 	/**
@@ -153,13 +158,49 @@ class HAVN_API {
     public function get_numbers($service,$country) {
         $cache_key = false;
         $url = "/numbers?service=".$service."&country=".$country;
-        return $this->get_curl($url, $cache_key);
+        $post_data = [];
+        return $this->get_curl($url, $cache_key, 'POST', $post_data);
     }
 
     public function get_number_codes($number_id) {
         $cache_key = false;
         $url = "/numbers/".$number_id."/codes";
-        return $this->get_curl($url, $cache_key);
+        $result = $this->get_curl($url, $cache_key);
+        
+        // Save codes to database if received
+        if (!empty($result) && isset($result['code'])) {
+            $this->save_codes_to_database($number_id, $result);
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Save received codes to database
+     */
+    private function save_codes_to_database($number_id, $codes_data) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'havn_purchases';
+        
+        // Prepare codes for storage
+        $codes_json = json_encode($codes_data);
+        
+        // Get status from API response
+        $status_number = isset($codes_data['state']) ? $codes_data['state'] : 'PENDING';
+        
+        // Update the purchase record with received codes and status
+        $wpdb->update(
+            $table_name,
+            array(
+                'code' => $codes_json,
+                'status_number' => $status_number,
+                'updated_at' => current_time('mysql')
+            ),
+            array('number_id' => $number_id),
+            array('%s', '%s', '%s'),
+            array('%s')
+        );
     }
 
     public function get_number_status($number_id) {
@@ -241,6 +282,7 @@ class HAVN_API {
 		// Get user balance first
 		$user_balance = $this->get_user_balance($user_id);
 
+        $service_price *=10;
 		if ($user_balance < $service_price) {
 			return array(
 				'success' => false,
@@ -251,7 +293,7 @@ class HAVN_API {
 		// Get service and country names for display
 		
 		// First, save purchase record with pending status
-		$purchase_id = $this->save_purchase_record_pending($user_id, $service_id, $country_code, $service_price, $service_name, $country_name);
+		$purchase_id = $this->save_purchase_record_pending($user_id, $service_id, $country_code, $service_price);
 		
 		if (!$purchase_id) {
 			return array(
@@ -262,7 +304,9 @@ class HAVN_API {
 		
 		// Deduct balance from user account via TeraWallet
 		$debit_ok = $this->deduct_user_balance($user_id, $service_price, $service_id, $country_code);
-		if (!$debit_ok) {
+        error_log(print_r($debit_ok, true));
+
+        if (!$debit_ok) {
 			// Update status to failed if debit fails
 			$this->update_purchase_status($purchase_id, 'failed', 'کسر از کیف پول ناموفق بود');
 			return array(
@@ -270,16 +314,22 @@ class HAVN_API {
 				'message' => 'کسر از کیف پول ناموفق بود'
 			);
 		}
-		
-		// Call get_numbers API to allocate a number
+        error_log(print_r([$service_id, $country_code], true));
+
+        // Call get_numbers API to allocate a number
 		$api_response = $this->get_numbers($service_id, $country_code);
-		
-		if (empty($api_response) || !isset($api_response['number_id'])) {
+        error_log(print_r($api_response, true));
+
+        if (empty($api_response) || !isset($api_response['number_id'])) {
+			// Refund the user's money since API failed
+			$refund_ok = $this->refund_user_balance($user_id, $service_price, $service_id, $country_code, 'خطا در تخصیص شماره از API');
+			
 			// Update status to failed if API fails
 			$this->update_purchase_status($purchase_id, 'failed', 'خطا در تخصیص شماره از API');
+			
 			return array(
 				'success' => false,
-				'message' => 'خطا در تخصیص شماره از API'
+				'message' => 'خطا در تخصیص شماره از API' . ($refund_ok ? ' - پول به حساب شما برگشت' : ' - خطا در بازگشت پول')
 			);
 		}
 		
@@ -292,9 +342,15 @@ class HAVN_API {
 		$update_ok = $this->update_purchase_completed($purchase_id, $number_id, $number, $cost, $api_response);
 		
 		if (!$update_ok) {
+			// Refund the user's money since database update failed
+			//$refund_ok = $this->refund_user_balance($user_id, $service_price, $service_id, $country_code, 'خطا در به‌روزرسانی اطلاعات خرید');
+			
+			// Update status to failed
+			$this->update_purchase_status($purchase_id, 'failed', 'خطا در به‌روزرسانی اطلاعات خرید');
+			
 			return array(
 				'success' => false,
-				'message' => 'خطا در به‌روزرسانی اطلاعات خرید'
+				'message' => 'خطا در به‌روزرسانی اطلاعات خرید' //. ($refund_ok ? ' - پول به حساب شما برگشت' : ' - خطا در بازگشت پول')
 			);
 		}
 		
@@ -348,6 +404,7 @@ class HAVN_API {
 	 * Deduct balance from user account using TeraWallet
 	 */
 	private function deduct_user_balance($user_id, $amount, $service_id = '', $country_code = '') {
+
 		if (function_exists('woo_wallet') && isset(woo_wallet()->wallet)) {
 			$note = sprintf(
 				'خرید شماره مجازی - سرویس: %s | کشور: %s',
@@ -361,9 +418,27 @@ class HAVN_API {
 	}
 	
 	/**
+	 * Refund balance to user account using TeraWallet
+	 */
+	public function refund_user_balance($user_id, $amount, $service_id = '', $country_code = '', $reason = '') {
+
+		if (function_exists('woo_wallet') && isset(woo_wallet()->wallet)) {
+			$note = sprintf(
+				'بازگشت پول خرید شماره مجازی - سرویس: %s | کشور: %s | دلیل: %s',
+				(string) $service_id,
+				(string) $country_code,
+				(string) $reason
+			);
+			$txn_id = woo_wallet()->wallet->credit($user_id, (float) $amount, $note, array('for' => 'havn_refund'));
+			return !empty($txn_id);
+		}
+		return false;
+	}
+	
+	/**
 	 * Save purchase record with pending status
 	 */
-	private function save_purchase_record_pending($user_id, $service_id, $country_code, $price, $service_name = '', $country_name = '') {
+	private function save_purchase_record_pending($user_id, $service_id, $country_code, $price) {
 		global $wpdb;
 		
 		$table_name = $wpdb->prefix . 'havn_purchases';
@@ -379,11 +454,12 @@ class HAVN_API {
 				'number' => '',
 				'cost' => 0,
 				'status' => 'pending',
+				'status_number' => 'PENDING',
 				'api_response' => '',
 				'created_at' => current_time('mysql'),
 				'updated_at' => current_time('mysql')
 			),
-			array('%d', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%f', '%s', '%s', '%s', '%s')
+			array('%d', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s', '%f', '%s', '%s', '%s', '%s')
 		);
 		
 		return $wpdb->insert_id;
@@ -481,20 +557,43 @@ class HAVN_API {
                 break;
             }
         }
-        $wpdb->insert(
-            $table_name,
-            array(
-                'service_short_name' => $service['service_short_name'],
-                'service_full_name' => $service['service_full_name'],
-                'service_icon' => $service['service_icon'] ?? '',
-                'is_active' => 1,
-                'created_at' => current_time('mysql'),
-                'updated_at' => current_time('mysql')
-            ),
-            array('%s', '%s', '%s', '%d', '%s', '%s')
+        
+        // Check if service already exists
+        $existing_service = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT id FROM $table_name WHERE service_short_name = %s",
+                $service_id
+            )
         );
 
-        return $wpdb->insert_id;
+        $data = array(
+            'service_short_name' => $service['service_short_name'],
+            'service_full_name' => $service['service_full_name'],
+            'service_icon' => $service['service_icon'] ?? '',
+            'is_active' => 1,
+            'updated_at' => current_time('mysql')
+        );
+
+        if ($existing_service) {
+            // Update existing record
+            $wpdb->update(
+                $table_name,
+                $data,
+                array('service_short_name' => $service_id),
+                array('%s', '%s', '%s', '%d', '%s'),
+                array('%s')
+            );
+            return $existing_service->id;
+        } else {
+            // Insert new record
+            $data['created_at'] = current_time('mysql');
+            $wpdb->insert(
+                $table_name,
+                $data,
+                array('%s', '%s', '%s', '%d', '%s', '%s')
+            );
+            return $wpdb->insert_id;
+        }
     }
 	
 	/**
@@ -512,30 +611,55 @@ class HAVN_API {
     /**
      * Save countrt record to database (legacy function - kept for compatibility)
      */
-    public function save_country_record($country) {
+    public function save_country_record($country,$service_id) {
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'havn_countries';
 
         $country_info = $country['country_info'];
-        $wpdb->insert(
-            $table_name,
-            array(
-                'country_code' => $country_info["country_code"],
-                'country_iso_code' => $country_info['country_iso_code'],
-                'country_name' => $country_info['country_name'],
-                'country_flag' => $country_info['country_flag'] ?? '',
-                'count_available' => $country['count'] ?? 0,
-                'price_usd' => $country['price'] ?? 0.0000,
-                'rental_time' => 0,
-                'is_active' => 1,
-                'created_at' => current_time('mysql'),
-                'updated_at' => current_time('mysql')
-            ),
-            array('%d', '%s', '%s', '%s', '%d', '%f', '%d', '%d', '%s', '%s')
+        $country_iso_code = $country_info['country_iso_code'];
+        
+        // Check if country already exists
+        $existing_country = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT id FROM $table_name WHERE country_iso_code = %s",
+                $country_iso_code
+            )
         );
 
-        return $wpdb->insert_id;
+        $data = array(
+            'service_short_name' => $service_id,
+            'country_code' => $country_info["country_code"],
+            'country_iso_code' => $country_iso_code,
+            'country_name' => $country_info['country_name'],
+            'country_flag' => $country_info['country_flag'] ?? '',
+            'count_available' => $country['count'] ?? 0,
+            'price_usd' => $country['price'] ?? 0.0000,
+            'rental_time' => 0,
+            'is_active' => 1,
+            'updated_at' => current_time('mysql')
+        );
+
+        if ($existing_country) {
+            // Update existing record
+            $wpdb->update(
+                $table_name,
+                $data,
+                array('country_iso_code' => $country_iso_code),
+                array('%s', '%s', '%s', '%s', '%d', '%f', '%d', '%d', '%s'),
+                array('%s')
+            );
+            return $existing_country->id;
+        } else {
+            // Insert new record
+            $data['created_at'] = current_time('mysql');
+            $wpdb->insert(
+                $table_name,
+                $data,
+                array('%s', '%s', '%s', '%s', '%d', '%f', '%d', '%d', '%s', '%s')
+            );
+            return $wpdb->insert_id;
+        }
     }
 	/**
 	 * Get country name from database

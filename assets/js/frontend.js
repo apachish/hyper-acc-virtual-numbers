@@ -747,7 +747,7 @@ function confirmPurchase() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showSuccessModal('شماره با موفقیت خریداری شد!');
+                showSuccessModal('شماره با موفقیت خریداری شد!به صفحه شماره مجازی خود برید و دریافت کد بزنید');
                 // Refresh the countries list
                 viewService(serviceId);
             } else {

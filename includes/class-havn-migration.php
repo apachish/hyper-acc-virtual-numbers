@@ -32,7 +32,9 @@ class HAVN_Migration {
         $new_fields = array(
             'number_id' => "ALTER TABLE $table_name ADD COLUMN number_id varchar(255) AFTER price",
             'number' => "ALTER TABLE $table_name ADD COLUMN number varchar(50) AFTER number_id",
-            'cost' => "ALTER TABLE $table_name ADD COLUMN cost decimal(10,4) AFTER number"
+            'cost' => "ALTER TABLE $table_name ADD COLUMN cost decimal(10,4) AFTER number",
+            'code' => "ALTER TABLE $table_name ADD COLUMN code longtext AFTER cost",
+            'status_number' => "ALTER TABLE $table_name ADD COLUMN status_number varchar(50) DEFAULT 'PENDING' AFTER code"
         );
         
         foreach ($new_fields as $field_name => $sql) {
