@@ -27,8 +27,74 @@ window.initServicesPage = function() {
     renderServicesPage(allServices.slice(0, perPage), 1);
     attachSearchListeners();
     
+    // Load user statistics
+    loadUserStats();
+    
     console.log('Services page initialized successfully');
 };
+
+// Load user statistics
+function loadUserStats() {
+    if (!havn_ajax.is_logged_in) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', 'havn_get_user_stats');
+    formData.append('nonce', havn_ajax.nonce);
+    
+    fetch(havn_ajax.ajax_url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateUserLimitsDisplay(data.data);
+        }
+    })
+    .catch(error => {
+        console.error('Error loading user stats:', error);
+    });
+}
+
+// Update user limits display
+function updateUserLimitsDisplay(stats) {
+    const limitsInfo = document.getElementById('user-limits-info');
+    const blockStatus = document.getElementById('block-status');
+    
+    if (!limitsInfo) return;
+    
+    // Update limit values
+    document.getElementById('pending-count').textContent = stats.pending_count || 0;
+    document.getElementById('recent-purchases').textContent = stats.recent_purchases || 0;
+    document.getElementById('recent-cancellations').textContent = stats.recent_cancellations || 0;
+    
+    // Show/hide block status
+    if (stats.is_blocked) {
+        blockStatus.style.display = 'block';
+        document.getElementById('block-until').textContent = `تا: ${stats.block_until}`;
+        limitsInfo.style.display = 'block';
+    } else {
+        blockStatus.style.display = 'none';
+        limitsInfo.style.display = 'block';
+    }
+    
+    // Highlight limits that are close to max
+    const pendingCount = document.getElementById('pending-count');
+    const recentPurchases = document.getElementById('recent-purchases');
+    const recentCancellations = document.getElementById('recent-cancellations');
+    
+    if (stats.pending_count >= 2) {
+        pendingCount.style.color = '#dc3545';
+    }
+    if (stats.recent_purchases >= 2) {
+        recentPurchases.style.color = '#dc3545';
+    }
+    if (stats.recent_cancellations >= 4) {
+        recentCancellations.style.color = '#dc3545';
+    }
+}
 
 jQuery(document).ready(function($) {
 
@@ -750,6 +816,8 @@ function confirmPurchase() {
                 showSuccessModal('شماره با موفقیت خریداری شد!به صفحه شماره مجازی خود برید و دریافت کد بزنید');
                 // Refresh the countries list
                 viewService(serviceId);
+                // Update user statistics
+                loadUserStats();
             } else {
                 showErrorModal('خطا: ' + (data.data || 'خطا در خرید شماره'));
             }

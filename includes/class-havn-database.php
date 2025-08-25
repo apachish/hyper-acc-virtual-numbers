@@ -176,16 +176,19 @@ class HAVN_Database {
         $table_name = $wpdb->prefix . 'havn_purchases';
         $table_service = $wpdb->prefix . 'havn_services';
 
-        $where_clause = "WHERE user_id = %d";
+        $where_clause = "WHERE p.user_id = %d";
         $params = array($user_id);
         
         if ($status) {
-            $where_clause .= " AND status = %s";
+            $where_clause .= " AND p.status = %s";
             $params[] = $status;
         }
         
-        $query = "SELECT * FROM $table_name p LEFT JOIN {$table_service} s ON p.service_id = s.service_short_name
-            $where_clause ORDER BY s.created_at DESC";
+        $query = "SELECT p.*, s.service_full_name, s.service_icon 
+            FROM $table_name p 
+            LEFT JOIN {$table_service} s ON p.service_id = s.service_short_name
+            $where_clause 
+            ORDER BY p.created_at DESC";
         
         return $wpdb->get_results($wpdb->prepare($query, $params));
     }

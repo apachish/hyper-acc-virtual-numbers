@@ -76,6 +76,7 @@ class HyperAccVirtualNumbers {
         require_once HAVN_PLUGIN_DIR . 'includes/class-havn-frontend.php';
         require_once HAVN_PLUGIN_DIR . 'includes/class-havn-database.php';
         require_once HAVN_PLUGIN_DIR . 'includes/class-havn-migration.php';
+        require_once HAVN_PLUGIN_DIR . 'includes/class-havn-rate-limiter.php';
     }
     
     private function init_admin() {

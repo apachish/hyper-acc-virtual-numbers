@@ -14,9 +14,11 @@ class HAVN_Frontend {
         add_action('wp_ajax_havn_purchase_number', array($this, 'ajax_purchase_number'));
         add_action('wp_ajax_nopriv_havn_purchase_number', array($this, 'ajax_purchase_number'));
         add_action('wp_ajax_havn_get_number_codes', array($this, 'ajax_get_number_codes'));
+        add_action('wp_ajax_havn_cancel_number', array($this, 'ajax_cancel_number'));
         add_action('wp_ajax_havn_get_purchase_details', array($this, 'ajax_get_purchase_details'));
         add_action('wp_ajax_havn_get_service_countries', array($this, 'ajax_get_service_countries'));
         add_action('wp_ajax_nopriv_havn_get_service_countries', array($this, 'ajax_get_service_countries'));
+        add_action('wp_ajax_havn_get_user_stats', array($this, 'ajax_get_user_stats'));
         add_shortcode('havn_services', array($this, 'services_shortcode'));
         add_shortcode('havn_user_purchases', array($this, 'user_purchases_shortcode'));
     }
@@ -118,6 +120,13 @@ class HAVN_Frontend {
         
         if (empty($service_id) || empty($country_code)) {
             wp_send_json_error('پارامترهای ورودی ناقص است');
+        }
+        
+        // Check rate limiting
+        $rate_check = HAVN_Rate_Limiter::can_purchase_number($user_id);
+        if (!$rate_check['can_purchase']) {
+            HAVN_Rate_Limiter::log_purchase_attempt($user_id, false, $rate_check['reason']);
+            wp_send_json_error($rate_check['reason']);
         }
         
         // Get service price from countries list
@@ -281,5 +290,90 @@ class HAVN_Frontend {
         );
         
         wp_send_json_success($purchase_data);
+    }
+    
+    /**
+     * AJAX handler for canceling numbers
+     */
+    public function ajax_cancel_number() {
+        check_ajax_referer('havn_cancel_number', 'nonce');
+        
+        if (!is_user_logged_in()) {
+            wp_send_json_error('لطفاً ابتدا وارد شوید');
+        }
+        
+        $number_id = sanitize_text_field($_POST['number_id']);
+        
+        if (empty($number_id)) {
+            wp_send_json_error('شناسه شماره الزامی است');
+        }
+        
+        // Verify user owns this number
+        $user_id = get_current_user_id();
+        $purchase = HAVN_Database::get_purchase_by_number_id($number_id, $user_id);
+        
+        if (!$purchase) {
+            wp_send_json_error('شماره یافت نشد یا متعلق به شما نیست');
+        }
+        
+        // Check if number can be canceled (no codes received)
+        if ($purchase->code) {
+            $codes_data = json_decode($purchase->code, true);
+            if ($codes_data && !empty($codes_data['code'])) {
+                wp_send_json_error('شماره‌ای که کد دریافت کرده قابل لغو نیست');
+            }
+        }
+        
+        // Cancel number via API
+        $api = new HAVN_API();
+        $result = $api->cancel_number($number_id);
+        
+        if ($result) {
+            // Update database status
+            global $wpdb;
+            $updated = $wpdb->update(
+                $wpdb->prefix . 'havn_purchases',
+                array(
+                    'status_number' => 'CANCELED',
+                    'updated_at' => current_time('mysql')
+                ),
+                array('number_id' => $number_id),
+                array('%s', '%s'),
+                array('%s')
+            );
+            
+            if ($updated !== false) {
+                // Check for excessive cancellations and block user if needed
+                $cancellation_check = HAVN_Rate_Limiter::check_cancellation_pattern($user_id);
+                if ($cancellation_check['blocked']) {
+                    wp_send_json_success(array(
+                        'message' => 'شماره با موفقیت لغو شد',
+                        'warning' => $cancellation_check['reason']
+                    ));
+                } else {
+                    wp_send_json_success('شماره با موفقیت لغو شد');
+                }
+            } else {
+                wp_send_json_error('خطا در بروزرسانی وضعیت در دیتابیس');
+            }
+        } else {
+            wp_send_json_error('خطا در لغو شماره از API');
+        }
+    }
+    
+    /**
+     * AJAX handler for getting user statistics
+     */
+    public function ajax_get_user_stats() {
+        check_ajax_referer('havn_frontend_nonce', 'nonce');
+        
+        if (!is_user_logged_in()) {
+            wp_send_json_error('لطفاً ابتدا وارد شوید');
+        }
+        
+        $user_id = get_current_user_id();
+        $stats = HAVN_Rate_Limiter::get_user_stats($user_id);
+        
+        wp_send_json_success($stats);
     }
 } 

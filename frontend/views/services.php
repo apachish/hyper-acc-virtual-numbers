@@ -41,6 +41,31 @@ $all_services_json = json_encode($services_list);
         <button class="info-btn" id="info-btn" onclick="openModal()" title="اطلاعات">i</button>
       </div>
     </div>
+    
+    <!-- User Limits Info -->
+    <div class="user-limits-info" id="user-limits-info" style="display: none;">
+      <div class="limits-container">
+        <div class="limit-item">
+          <span class="limit-label">شماره‌های در انتظار:</span>
+          <span class="limit-value" id="pending-count">0</span>
+          <span class="limit-max">/ 3</span>
+        </div>
+        <div class="limit-item">
+          <span class="limit-label">خریدهای اخیر (5 دقیقه):</span>
+          <span class="limit-value" id="recent-purchases">0</span>
+          <span class="limit-max">/ 3</span>
+        </div>
+        <div class="limit-item">
+          <span class="limit-label">لغوهای اخیر (24 ساعت):</span>
+          <span class="limit-value" id="recent-cancellations">0</span>
+          <span class="limit-max">/ 5</span>
+        </div>
+      </div>
+      <div class="block-status" id="block-status" style="display: none;">
+        <span class="block-message">کاربر مسدود شده است</span>
+        <span class="block-until" id="block-until"></span>
+      </div>
+    </div>
       <input type="hidden" value="<?php echo $base_path; ?>" id="base_path_js">
       <textarea style="display: none"  id="all_services_json"><?php echo $all_services_json; ?></textarea>
       <input type="hidden" value="<?php echo get_option('havn_usd_rate', 50000); ?>" id="havn_usd_rate">

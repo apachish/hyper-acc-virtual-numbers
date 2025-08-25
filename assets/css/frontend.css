@@ -1,5 +1,595 @@
 /* Hyper-Acc Virtual Numbers Plugin - Frontend Styles */
 
+/* User Purchases Page Specific Styles */
+.havn-virtual-numbers-container .rent-header {
+  background: linear-gradient(135deg, #FFEFEC 0%, #FFF5F5 100%) !important;
+  border-bottom: 2px solid #FC5A44 !important;
+}
+
+.havn-virtual-numbers-container .header-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.havn-virtual-numbers-container .rent-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  color: #FC5A44 !important;
+  margin: 0 !important;
+}
+
+.havn-virtual-numbers-container .rent-title i {
+  font-size: 32px !important;
+  color: #FC5A44 !important;
+}
+
+.havn-virtual-numbers-container .header-subtitle {
+  font-size: 16px !important;
+  color: #666666 !important;
+  margin: 0 !important;
+  font-weight: 400 !important;
+}
+
+.havn-virtual-numbers-container .search-input-wrapper {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.havn-virtual-numbers-container .search-icon {
+  position: absolute !important;
+  left: 16px !important;
+  color: #999999 !important;
+  font-size: 16px !important;
+  z-index: 2 !important;
+}
+
+.havn-virtual-numbers-container .search-box input {
+  padding-left: 48px !important;
+  border-radius: 12px !important;
+  border: 2px solid #e5e7eb !important;
+  font-size: 16px !important;
+  width: 350px !important;
+  transition: all 0.3s ease !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.havn-virtual-numbers-container .search-box input:focus {
+  outline: none !important;
+  border-color: #FC5A44 !important;
+  box-shadow: 0 0 0 4px rgba(252, 90, 68, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+.havn-virtual-numbers-container .search-results-info {
+  background: #f8f9fa !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  margin: 16px 0 !important;
+}
+
+.havn-virtual-numbers-container .search-results-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  font-size: 14px !important;
+  color: #666666 !important;
+}
+
+.havn-virtual-numbers-container .clear-search-btn {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.havn-virtual-numbers-container .clear-search-btn:hover {
+  background: #e53e3e !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Service Items */
+.havn-virtual-numbers-container .service-item {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  margin-bottom: 16px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.havn-virtual-numbers-container .service-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+  border-color: #FC5A44 !important;
+}
+
+.havn-virtual-numbers-container .service-icon-wrapper {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #f8f9fa !important;
+  border: 2px solid #e5e7eb !important;
+}
+
+.havn-virtual-numbers-container .service-logo {
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: contain !important;
+}
+
+.havn-virtual-numbers-container .service-stats {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  margin-top: 8px !important;
+}
+
+.havn-virtual-numbers-container .purchase-count {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 14px !important;
+  color: #666666 !important;
+  font-weight: 500 !important;
+}
+
+.havn-virtual-numbers-container .purchase-count i {
+  color: #FC5A44 !important;
+  font-size: 16px !important;
+}
+
+/* Country Items */
+.havn-virtual-numbers-container .country-item {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  margin-bottom: 16px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.havn-virtual-numbers-container .country-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+  border-color: #28a745 !important;
+}
+
+.havn-virtual-numbers-container .country-flag-wrapper {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #f8f9fa !important;
+  border: 2px solid #e5e7eb !important;
+}
+
+.havn-virtual-numbers-container .status-badge {
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+}
+
+.havn-virtual-numbers-container .status-pending {
+  background: #fff3cd !important;
+  color: #856404 !important;
+}
+
+.havn-virtual-numbers-container .status-canceled {
+  background: #f8d7da !important;
+  color: #721c24 !important;
+}
+
+.havn-virtual-numbers-container .status-completed {
+  background: #d4edda !important;
+  color: #155724 !important;
+}
+
+/* Buttons */
+.havn-virtual-numbers-container .primary-btn {
+  background: linear-gradient(135deg, #FC5A44 0%, #FF6B6B 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 12px 20px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  box-shadow: 0 4px 12px rgba(252, 90, 68, 0.3) !important;
+}
+
+.havn-virtual-numbers-container .primary-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(252, 90, 68, 0.4) !important;
+}
+
+.havn-virtual-numbers-container .secondary-btn {
+  background: #6c757d !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 12px 20px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.havn-virtual-numbers-container .secondary-btn:hover {
+  background: #5a6268 !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Countries Section */
+.havn-virtual-numbers-container .countries-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 24px !important;
+  padding: 16px 20px !important;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.havn-virtual-numbers-container .service-info-header {
+  flex: 1 !important;
+}
+
+.havn-virtual-numbers-container .service-title-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.havn-virtual-numbers-container .service-icon {
+  font-size: 24px !important;
+  color: #28a745 !important;
+  background: #d4edda !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.havn-virtual-numbers-container .service-title-content h3 {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #333333 !important;
+  margin: 0 0 4px 0 !important;
+  line-height: 1.2 !important;
+}
+
+.havn-virtual-numbers-container .service-description {
+  font-size: 13px !important;
+  color: #666666 !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+}
+
+.havn-virtual-numbers-container .countries-search-box {
+  margin-left: auto !important;
+}
+
+.havn-virtual-numbers-container .countries-search-box .search-input-wrapper {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.havn-virtual-numbers-container .countries-search-box .search-icon {
+  position: absolute !important;
+  left: 16px !important;
+  color: #999999 !important;
+  font-size: 16px !important;
+  z-index: 2 !important;
+}
+
+.havn-virtual-numbers-container .countries-search-box input {
+  padding-left: 48px !important;
+  border-radius: 8px !important;
+  border: 2px solid #e5e7eb !important;
+  font-size: 14px !important;
+  width: 250px !important;
+  transition: all 0.3s ease !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.havn-virtual-numbers-container .countries-search-box input:focus {
+  outline: none !important;
+  border-color: #28a745 !important;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Codes Section (Existing Codes) */
+.havn-virtual-numbers-container .codes-section {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  margin-top: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+}
+
+/* Codes Result Box (New Codes) */
+.havn-virtual-numbers-container .codes-result-box {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  margin-top: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+}
+
+.havn-virtual-numbers-container .codes-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px 16px !important;
+  background: #f8f9fa !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.havn-virtual-numbers-container .codes-header h4 {
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #333333 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.havn-virtual-numbers-container .close-codes-btn {
+  background: none !important;
+  border: none !important;
+  color: #999999 !important;
+  cursor: pointer !important;
+  padding: 4px !important;
+  border-radius: 4px !important;
+  transition: all 0.3s ease !important;
+}
+
+.havn-virtual-numbers-container .close-codes-btn:hover {
+  background: #e5e7eb !important;
+  color: #FC5A44 !important;
+}
+
+.havn-virtual-numbers-container .codes-content {
+  padding: 16px !important;
+}
+
+.havn-virtual-numbers-container .code-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 8px 12px !important;
+  background: #f8f9fa !important;
+  border-radius: 6px !important;
+  margin-bottom: 8px !important;
+  border: 1px solid #e9ecef !important;
+}
+
+.havn-virtual-numbers-container .code-item:last-child {
+  margin-bottom: 0 !important;
+}
+
+.havn-virtual-numbers-container .code-item.new-code {
+  background: #fff3cd !important;
+  border: 1px solid #ffeaa7 !important;
+  position: relative !important;
+}
+
+.havn-virtual-numbers-container .new-badge {
+  position: absolute !important;
+  top: -8px !important;
+  right: -8px !important;
+  background: #28a745 !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  padding: 2px 6px !important;
+  border-radius: 10px !important;
+  text-transform: uppercase !important;
+}
+
+.havn-virtual-numbers-container .code-text {
+  font-family: 'Courier New', monospace !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #FC5A44 !important;
+  background: #ffffff !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.havn-virtual-numbers-container .code-time {
+  font-size: 12px !important;
+  color: #666666 !important;
+}
+
+.havn-virtual-numbers-container .codes-footer {
+  padding: 8px 16px !important;
+  background: #f8f9fa !important;
+  border-top: 1px solid #e5e7eb !important;
+  font-size: 12px !important;
+  color: #666666 !important;
+}
+
+.havn-virtual-numbers-container .status-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.havn-virtual-numbers-container .no-codes {
+  text-align: center !important;
+  padding: 20px !important;
+  color: #666666 !important;
+}
+
+.havn-virtual-numbers-container .no-codes i {
+  font-size: 32px !important;
+  margin-bottom: 8px !important;
+  opacity: 0.5 !important;
+}
+
+.havn-virtual-numbers-container .no-codes p {
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+
+.havn-virtual-numbers-container .error-message {
+  text-align: center !important;
+  padding: 20px !important;
+  color: #dc3545 !important;
+}
+
+.havn-virtual-numbers-container .error-message i {
+  font-size: 32px !important;
+  margin-bottom: 8px !important;
+}
+
+.havn-virtual-numbers-container .error-message p {
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+
+/* Modal Improvements */
+.havn-virtual-numbers-container .code-modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 20px 24px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.havn-virtual-numbers-container .modal-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.havn-virtual-numbers-container .modal-title i {
+  font-size: 24px !important;
+  color: #FC5A44 !important;
+}
+
+.havn-virtual-numbers-container .modal-title h3 {
+  margin: 0 !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #333333 !important;
+}
+
+.havn-virtual-numbers-container .close-modal {
+  background: none !important;
+  border: none !important;
+  font-size: 24px !important;
+  color: #999999 !important;
+  cursor: pointer !important;
+  padding: 8px !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease !important;
+}
+
+.havn-virtual-numbers-container .close-modal:hover {
+  background: #f8f9fa !important;
+  color: #FC5A44 !important;
+}
+
+/* No Results Container */
+.havn-virtual-numbers-container .havn-no-results {
+  text-align: center !important;
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  padding: 60px 40px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  max-width: 500px !important;
+  width: 100% !important;
+  border: 2px solid #f0f0f0 !important;
+  margin: 40px auto !important;
+}
+
+.havn-virtual-numbers-container .havn-no-results i {
+  font-size: 64px !important;
+  color: #FC5A44 !important;
+  margin-bottom: 20px !important;
+  opacity: 0.7 !important;
+}
+
+.havn-virtual-numbers-container .havn-no-results h3 {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #333333 !important;
+  margin: 0 0 12px 0 !important;
+}
+
+.havn-virtual-numbers-container .havn-no-results p {
+  font-size: 14px !important;
+  color: #666666 !important;
+  margin: 0 0 24px 0 !important;
+  line-height: 1.5 !important;
+}
+
+.havn-virtual-numbers-container .havn-no-results .clear-search-btn {
+  background: #FC5A44 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.havn-virtual-numbers-container .havn-no-results .clear-search-btn:hover {
+  background: #e53e3e !important;
+  transform: translateY(-2px) !important;
+}
+
 /* No Purchases Container */
 .havn-no-purchases-container {
   display: flex !important;
@@ -300,6 +890,66 @@
   gap: 12px !important;
   padding: 0 24px 24px 24px !important;
   justify-content: flex-end !important;
+}
+
+/* User Limits Info Styles */
+.havn-virtual-numbers-container .user-limits-info {
+    background: #f8f9fa !important;
+    border: 1px solid #e9ecef !important;
+    border-radius: 8px !important;
+    padding: 15px !important;
+    margin: 20px 0 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.havn-virtual-numbers-container .limits-container {
+    display: flex !important;
+    justify-content: space-around !important;
+    flex-wrap: wrap !important;
+    gap: 15px !important;
+}
+
+.havn-virtual-numbers-container .limit-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    font-size: 14px !important;
+}
+
+.havn-virtual-numbers-container .limit-label {
+    color: #6c757d !important;
+    font-weight: 500 !important;
+}
+
+.havn-virtual-numbers-container .limit-value {
+    font-weight: bold !important;
+    color: #007bff !important;
+}
+
+.havn-virtual-numbers-container .limit-max {
+    color: #6c757d !important;
+}
+
+.havn-virtual-numbers-container .block-status {
+    margin-top: 10px !important;
+    padding: 10px !important;
+    background: #f8d7da !important;
+    border: 1px solid #f5c6cb !important;
+    border-radius: 5px !important;
+    text-align: center !important;
+}
+
+.havn-virtual-numbers-container .block-message {
+    color: #721c24 !important;
+    font-weight: bold !important;
+    display: block !important;
+}
+
+.havn-virtual-numbers-container .block-until {
+    color: #721c24 !important;
+    font-size: 12px !important;
+    display: block !important;
+    margin-top: 5px !important;
 }
 
 /* Success Modal */
@@ -1095,4 +1745,67 @@
     font-size: 12px !important;
     min-width: 80px !important;
   }
+} 
+
+/* Existing code display styles */
+.existing-code-display {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 15px;
+    background: #e8f5e8;
+    border: 1px solid #4caf50;
+    border-radius: 6px;
+    color: #2e7d32;
+}
+
+.existing-code-display .code-text {
+    font-weight: 600;
+    font-size: 16px;
+    color: #2e7d32;
+}
+
+.existing-code-display .code-time {
+    font-size: 12px;
+    color: #388e3c;
+}
+
+.new-badge {
+    background: #ff5722;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Danger button styles */
+.danger-btn {
+    background: #dc3545 !important;
+    color: white !important;
+    border: 1px solid #dc3545 !important;
+}
+
+.danger-btn:hover {
+    background: #c82333 !important;
+    border-color: #bd2130 !important;
+}
+
+/* Canceled message styles */
+.canceled-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    color: #721c24;
+    font-size: 14px;
+}
+
+.canceled-message i {
+    color: #dc3545;
+    font-size: 16px;
 } 
