@@ -25,37 +25,37 @@ $services_data = array();
 $services_list = array();
 $all_services_json = '[]';
 
-    // Process purchases if user has any
-    if ($has_purchases) {
-        // Get base path for service icons
-        $base_path = get_option('havn_services_base_path', '');
+// Process purchases if user has any
+if ($has_purchases) {
+    // Get base path for service icons
+    $base_path = get_option('havn_services_base_path', '');
+    
+    // Group purchases by service
+    foreach ($purchases as $purchase) {
+        $service_key = $purchase->service_id;
         
-        // Group purchases by service
-        foreach ($purchases as $purchase) {
-            $service_key = $purchase->service_id;
-            
-            if (!isset($services_data[$service_key])) {
-                // Build complete service icon URL
-                $service_icon_url = '';
-                if (!empty($purchase->service_icon)) {
-                    $service_icon_url = $base_path . $purchase->service_icon;
-                }
-                
-                $services_data[$service_key] = array(
-                    'service_id' => $purchase->service_id,
-                    'service_name' => $purchase->service_full_name,
-                    'service_icon' => $service_icon_url,
-                    'purchases' => array()
-                );
+        if (!isset($services_data[$service_key])) {
+            // Build complete service icon URL
+            $service_icon_url = '';
+            if (!empty($purchase->service_icon)) {
+                $service_icon_url = $base_path . $purchase->service_icon;
             }
             
-            $services_data[$service_key]['purchases'][] = $purchase;
+            $services_data[$service_key] = array(
+                'service_id' => $purchase->service_id,
+                'service_name' => $purchase->service_full_name,
+                'service_icon' => $service_icon_url,
+                'purchases' => array()
+            );
         }
         
-        // Convert to indexed array for JavaScript
-        $services_list = array_values($services_data);
-        $all_services_json = json_encode($services_list);
+        $services_data[$service_key]['purchases'][] = $purchase;
     }
+    
+    // Convert to indexed array for JavaScript
+    $services_list = array_values($services_data);
+    $all_services_json = json_encode($services_list);
+}
 ?>
 
 <!-- Main Container -->
@@ -93,6 +93,7 @@ $all_services_json = '[]';
       <input type="hidden" value="<?php echo get_option('havn_usd_rate', 50000); ?>" id="havn_usd_rate">
       <input type="hidden" value="<?php echo get_option('havn_profit_margin', 10); ?>" id="havn_profit_margin">
     </div>
+    
     <?php if ($has_purchases): ?>
     <!-- Search Results Info -->
     <div class="search-results-info" id="search-results-info" style="display: none;">
@@ -174,89 +175,42 @@ $all_services_json = '[]';
           <!-- Countries will be loaded here -->
         </div>
       </div>
-
-      <!-- Code Modal -->
-      <div class="code-modal" id="code-modal" style="display: none;">
-        <div class="code-modal-overlay" onclick="closeCodeModal()"></div>
-        <div class="code-modal-content">
-          <div class="code-modal-header">
-            <div class="modal-title">
-              <i class="fas fa-key"></i>
-              <h3>کدهای دریافتی</h3>
-            </div>
-            <button class="close-modal" onclick="closeCodeModal()">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div class="code-modal-body">
-            <div id="codes-list"></div>
-            <div class="refresh-section">
-              <button id="refresh-codes" class="refresh-button">
-                <i class="fas fa-sync-alt"></i>
-                بروزرسانی خودکار
-              </button>
-              <span id="refresh-status"></span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
 
 <script>
-/**
- * User Purchases Page JavaScript
- * 
- * @package Hyper-Acc Virtual Numbers
- * @version 1.0.0
- */
-
 // Global variables
 let allServices = [];
 let currentPage = 1;
 let perPage = 20;
 let currentService = null;
-let refreshInterval = null;
 const ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOMContentLoaded event fired');
     <?php if ($has_purchases): ?>
-    console.log('User has purchases, initializing page');
     initUserPurchasesPage();
-    <?php else: ?>
-    console.log('User has no purchases');
     <?php endif; ?>
 });
 
 function initUserPurchasesPage() {
-    console.log('initUserPurchasesPage called');
-    
     // Load services data
     const servicesJsonElement = document.getElementById('all_services_json');
     if (!servicesJsonElement) {
-        console.log('all_services_json element not found');
         return;
     }
     
     const servicesJson = servicesJsonElement.value;
-    console.log('servicesJson:', servicesJson);
-    console.log('servicesJson length:', servicesJson.length);
     
     if (!servicesJson || servicesJson.trim() === '') {
-        console.log('servicesJson is empty');
         allServices = [];
         return;
     }
     
     try {
         allServices = JSON.parse(servicesJson);
-        console.log('allServices loaded:', allServices);
     } catch (error) {
-        console.error('Error parsing services JSON:', error);
-        console.error('JSON string:', servicesJson);
         allServices = [];
         return;
     }
@@ -265,7 +219,6 @@ function initUserPurchasesPage() {
     if (allServices.length > 0) {
         renderServicesPage();
     } else {
-        console.log('No services to render');
         const container = document.getElementById('services-container');
         if (container) {
             container.innerHTML = `
@@ -297,9 +250,6 @@ function initUserPurchasesPage() {
 }
 
 function renderServicesPage() {
-    console.log('renderServicesPage called');
-    console.log('allServices:', allServices);
-    
     // If services count is less than perPage, show all services
     let servicesToShow;
     if (allServices.length <= perPage) {
@@ -310,11 +260,8 @@ function renderServicesPage() {
         servicesToShow = allServices.slice(startIndex, endIndex);
     }
     
-    console.log('servicesToShow:', servicesToShow);
-    
     const container = document.getElementById('services-container');
     if (!container) {
-        console.log('services-container not found');
         return;
     }
     
@@ -370,14 +317,9 @@ function renderServicesPage() {
 }
 
 function showCountries(serviceId) {
-    console.log('showCountries called with serviceId:', serviceId);
-    console.log('allServices:', allServices);
-    
     currentService = allServices.find(s => s.service_id === serviceId);
-    console.log('currentService found:', currentService);
     
     if (!currentService) {
-        console.log('No service found with ID:', serviceId);
         return;
     }
     
@@ -404,19 +346,14 @@ function showCountries(serviceId) {
 }
 
 function renderCountries() {
-    console.log('renderCountries called');
-    console.log('currentService:', currentService);
-    
     const container = document.getElementById('countries-container');
     if (!container) {
-        console.log('countries-container not found');
         return;
     }
     
     container.innerHTML = '';
     
     if (!currentService || !currentService.purchases || currentService.purchases.length === 0) {
-        console.log('No purchases found for current service');
         container.innerHTML = `
             <div class="havn-no-purchases">
                 <i class="fas fa-phone-slash"></i>
@@ -425,8 +362,6 @@ function renderCountries() {
         `;
         return;
     }
-    
-    console.log('Rendering', currentService.purchases.length, 'purchases');
     
     currentService.purchases.forEach(purchase => {
         const countryElement = document.createElement('div');
@@ -447,7 +382,7 @@ function renderCountries() {
                     existingCodeTime = codesData.received_at || 'نامشخص';
                 }
             } catch (e) {
-                console.error('Error parsing codes:', e);
+                // Error parsing codes
             }
         }
         
@@ -456,8 +391,8 @@ function renderCountries() {
             const purchaseTime = new Date(purchase.created_at);
             const currentTime = new Date();
             const timeDiff = (currentTime - purchaseTime) / (1000 * 60); // minutes
-            console.log(timeDiff,currentTime,purchaseTime);
-            if (timeDiff <= 5) {
+            
+            if (timeDiff >= 5) {
                 shouldShowCancel = true;
             }
         }
@@ -490,15 +425,10 @@ function renderCountries() {
                     <div></div>
                 ` : purchase.number_id ? `
                     ${shouldShowCancel ? `
-                         <button class="view-btn primary-btn "  onclick="getCodes('${purchase.number_id}', this)">
-                                <i class="fas fa-key"></i>
-                                دریافت کد
-                            </button>
-                        <button class="view-btn danger-btn" style="margin-top: 5px" onclick="cancelNumber('${purchase.number_id}', this)">
+                        <button class="view-btn danger-btn" onclick="cancelNumber('${purchase.number_id}', this)">
                             <i class="fas fa-times"></i>
                             لغو شماره
                         </button>
-
                     ` : hasExistingCode ? `
                         <div class="existing-code-display">
                             <span class="code-text">${existingCode}</span>
@@ -526,11 +456,7 @@ function renderCountries() {
     });
 }
 
-// Function removed - no longer needed
-
 function getCodes(numberId, button) {
-    console.log('getCodes called for numberId:', numberId);
-    
     // Show loading
     const originalText = button.innerHTML;
     button.disabled = true;
@@ -547,8 +473,6 @@ function getCodes(numberId, button) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('getCodes response:', data);
-        
         // Get the result box
         const resultBox = document.getElementById(`codes-result-${numberId}`);
         if (!resultBox) return;
@@ -635,7 +559,6 @@ function getCodes(numberId, button) {
         }
     })
     .catch(error => {
-        console.error('getCodes error:', error);
         const resultBox = document.getElementById(`codes-result-${numberId}`);
         if (resultBox) {
             resultBox.innerHTML = `
@@ -662,65 +585,7 @@ function getCodes(numberId, button) {
     });
 }
 
-// Function removed - no longer needed
-
-function renderCodesModal(codes, numberId) {
-    console.log('renderCodesModal called with codes:', codes);
-    
-    const codesList = document.getElementById('codes-list');
-    
-    if (codes && codes.length > 0) {
-        codesList.innerHTML = `
-            <div class="codes-header">
-                <h4>کدهای دریافتی برای شماره ${numberId}</h4>
-            </div>
-            <div class="codes-table">
-                ${codes.map(code => `
-                    <div class="code-item">
-                        <span class="code-text">${code.code || 'کد خالی'}</span>
-                        <span class="code-time">${code.received_at || 'نامشخص'}</span>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    } else {
-        codesList.innerHTML = `
-            <div class="no-codes">
-                <i class="fas fa-inbox"></i>
-                <p>هنوز کدی دریافت نشده است</p>
-                <p>وضعیت: ${codes && codes.state ? codes.state : 'نامشخص'}</p>
-            </div>
-        `;
-    }
-}
-
-function startAutoRefresh(numberId) {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-    }
-    
-    refreshInterval = setInterval(() => {
-        showAllCodes(numberId);
-    }, 10000);
-    
-    document.getElementById('refresh-status').textContent = 'بروزرسانی خودکار فعال';
-}
-
-function closeCodeModal() {
-    document.getElementById('code-modal').style.display = 'none';
-    
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-        refreshInterval = null;
-    }
-    
-    document.getElementById('refresh-status').textContent = '';
-}
-
 function filterServices(searchTerm) {
-    console.log('filterServices called with searchTerm:', searchTerm);
-    console.log('allServices:', allServices);
-    
     const filteredServices = allServices.filter(service => {
         // Search in service name
         const serviceNameMatch = service.service_name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -734,8 +599,6 @@ function filterServices(searchTerm) {
         
         return serviceNameMatch || purchaseMatch;
     });
-    
-    console.log('filteredServices:', filteredServices);
     
     // Update display
     const container = document.getElementById('services-container');
@@ -799,8 +662,6 @@ function filterServices(searchTerm) {
 }
 
 function clearSearch() {
-    console.log('clearSearch called');
-    
     // Clear search input
     const searchInput = document.getElementById('havn-services-search');
     if (searchInput) {
@@ -818,8 +679,6 @@ function clearSearch() {
 }
 
 function filterCountries(searchTerm) {
-    console.log('filterCountries called with searchTerm:', searchTerm);
-    
     if (!currentService || !currentService.purchases) {
         return;
     }
@@ -829,8 +688,6 @@ function filterCountries(searchTerm) {
         purchase.number.includes(searchTerm) ||
         (purchase.status_number && purchase.status_number.toLowerCase().includes(searchTerm))
     );
-    
-    console.log('filteredPurchases:', filteredPurchases);
     
     const container = document.getElementById('countries-container');
     if (!container) return;
@@ -867,7 +724,7 @@ function filterCountries(searchTerm) {
                     existingCodeTime = codesData.received_at || 'نامشخص';
                 }
             } catch (e) {
-                console.error('Error parsing codes:', e);
+                // Error parsing codes
             }
         }
         
@@ -949,8 +806,6 @@ function closeCodesResult(numberId) {
 }
 
 function cancelNumber(numberId, button) {
-    console.log('cancelNumber called for numberId:', numberId);
-    
     if (!confirm('آیا مطمئن هستید که می‌خواهید این شماره را لغو کنید؟')) {
         return;
     }
@@ -971,8 +826,6 @@ function cancelNumber(numberId, button) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('cancelNumber response:', data);
-        
         if (data.success) {
             // Update the status in the UI
             const row = button.closest('.list-item');
@@ -1013,8 +866,6 @@ function cancelNumber(numberId, button) {
         }
     })
     .catch(error => {
-        console.error('Error canceling number:', error);
-        
         // Restore button
         button.disabled = false;
         button.innerHTML = originalText;
@@ -1079,14 +930,6 @@ function updatePaginationInfo() {
             const endIndex = Math.min(currentPage * perPage, totalServices);
             paginationInfo.textContent = `نمایش ${startIndex} تا ${endIndex} از ${totalServices} سرویس`;
         }
-    }
-}
-
-// Close modals when clicking outside
-window.onclick = function(event) {
-    const codeModal = document.getElementById('code-modal');
-    if (event.target === codeModal) {
-        closeCodeModal();
     }
 }
 </script>

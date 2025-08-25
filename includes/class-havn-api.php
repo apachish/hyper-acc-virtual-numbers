@@ -186,20 +186,92 @@ class HAVN_API {
         // Prepare codes for storage
         $codes_json = json_encode($codes_data);
         
-        // Get status from API response
-        $status_number = isset($codes_data['state']) ? $codes_data['state'] : 'PENDING';
+        // Get status from API response and map it to our status
+        $api_status = isset($codes_data['state']) ? $codes_data['state'] : 'PENDING';
+        $status_number = $this->map_api_status_to_local_status($api_status);
+        
+        // Get purchase details for refund if needed
+        $purchase = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$table_name} WHERE number_id = %s",
+            $number_id
+        ));
         
         // Update the purchase record with received codes and status
+        $update_data = array(
+            'code' => $codes_json,
+            'status_number' => $status_number,
+            'updated_at' => current_time('mysql')
+        );
+        
         $wpdb->update(
             $table_name,
-            array(
-                'code' => $codes_json,
-                'status_number' => $status_number,
-                'updated_at' => current_time('mysql')
-            ),
+            $update_data,
             array('number_id' => $number_id),
             array('%s', '%s', '%s'),
             array('%s')
+        );
+        
+        // Handle refund if status is CANCELED or REFUNDED
+        if (($status_number === 'CANCELED' || $api_status === 'REFUNDED') && $purchase) {
+            $this->process_refund($purchase);
+        }
+    }
+    
+    /**
+     * Map API status to local status
+     */
+    private function map_api_status_to_local_status($api_status) {
+        switch (strtoupper($api_status)) {
+            case 'COMPLETED':
+                return 'COMPLETED';
+            case 'CANCELED':
+            case 'CANCELLED':
+                return 'CANCELED';
+            case 'REFUNDED':
+                return 'CANCELED'; // Map REFUNDED to CANCELED for consistency
+            case 'PENDING':
+            default:
+                return 'PENDING';
+        }
+    }
+    
+    /**
+     * Process refund for canceled/refunded numbers
+     */
+    private function process_refund($purchase) {
+        global $wpdb;
+        
+        // Only refund if status was PENDING (not already processed)
+        if ($purchase->status_number !== 'PENDING') {
+            return;
+        }
+        
+        $user_id = $purchase->user_id;
+        $cost = floatval($purchase->cost);
+        
+        if ($cost <= 0) {
+            return;
+        }
+        
+        // Get current user balance
+        $current_balance = get_user_meta($user_id, 'havn_balance', true);
+        $current_balance = floatval($current_balance ?: 0);
+        
+        // Add refund amount to user balance
+        $new_balance = $current_balance + $cost;
+        update_user_meta($user_id, 'havn_balance', $new_balance);
+        
+        // Log the refund
+        $wpdb->insert(
+            $wpdb->prefix . 'havn_transactions',
+            array(
+                'user_id' => $user_id,
+                'type' => 'refund',
+                'amount' => $cost,
+                'description' => "بازگشت مبلغ برای شماره {$purchase->number} (وضعیت: {$purchase->status_number})",
+                'created_at' => current_time('mysql')
+            ),
+            array('%d', '%s', '%f', '%s', '%s')
         );
     }
 
@@ -213,6 +285,14 @@ class HAVN_API {
      * Cancel a rented phone number
      */
     public function cancel_number($number_id) {
+        global $wpdb;
+        
+        // Get purchase details before cancellation
+        $purchase = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}havn_purchases WHERE number_id = %s",
+            $number_id
+        ));
+        
         $url = "/numbers/{$number_id}/state?state=CANCELED";
         
         $response = wp_remote_request($this->api_url . $url, array(
@@ -234,6 +314,23 @@ class HAVN_API {
         $status_code = wp_remote_retrieve_response_code($response);
         
         if ($status_code === 204) {
+            // Update local status to CANCELED
+            $wpdb->update(
+                $wpdb->prefix . 'havn_purchases',
+                array(
+                    'status_number' => 'CANCELED',
+                    'updated_at' => current_time('mysql')
+                ),
+                array('number_id' => $number_id),
+                array('%s', '%s'),
+                array('%s')
+            );
+            
+            // Process refund if purchase exists and was PENDING
+            if ($purchase && $purchase->status_number === 'PENDING') {
+                $this->process_refund($purchase);
+            }
+            
             return array(
                 'success' => true,
                 'message' => 'شماره با موفقیت لغو شد'
