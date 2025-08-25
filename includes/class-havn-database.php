@@ -174,7 +174,8 @@ class HAVN_Database {
         global $wpdb;
         
         $table_name = $wpdb->prefix . 'havn_purchases';
-        
+        $table_service = $wpdb->prefix . 'havn_services';
+
         $where_clause = "WHERE user_id = %d";
         $params = array($user_id);
         
@@ -183,7 +184,8 @@ class HAVN_Database {
             $params[] = $status;
         }
         
-        $query = "SELECT * FROM $table_name $where_clause ORDER BY created_at DESC";
+        $query = "SELECT * FROM $table_name p LEFT JOIN {$table_service} s ON p.service_id = s.service_short_name
+            $where_clause ORDER BY s.created_at DESC";
         
         return $wpdb->get_results($wpdb->prepare($query, $params));
     }
