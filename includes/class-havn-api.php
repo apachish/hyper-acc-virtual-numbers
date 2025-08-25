@@ -187,9 +187,9 @@ class HAVN_API {
         $codes_json = json_encode($codes_data);
         
         // Get status from API response and map it to our status
-        $api_status = isset($codes_data['state']) ? $codes_data['state'] : 'PENDING';
-        $status_number = $this->map_api_status_to_local_status($api_status);
-        
+        $status_number = isset($codes_data['state']) ? $codes_data['state'] : 'PENDING';
+        $status = $this->map_api_status_to_local_status($status_number);
+
         // Get purchase details for refund if needed
         $purchase = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM {$table_name} WHERE number_id = %s",
@@ -200,6 +200,7 @@ class HAVN_API {
         $update_data = array(
             'code' => $codes_json,
             'status_number' => $status_number,
+            'status' => $status,
             'updated_at' => current_time('mysql')
         );
         
@@ -212,7 +213,7 @@ class HAVN_API {
         );
         
         // Handle refund if status is CANCELED or REFUNDED
-        if (($status_number === 'CANCELED' || $api_status === 'REFUNDED') && $purchase) {
+        if (($status_number === 'CANCELED' || $status_number === 'REFUNDED') && $purchase) {
             $this->process_refund($purchase);
         }
     }
@@ -274,11 +275,120 @@ class HAVN_API {
             array('%d', '%s', '%f', '%s', '%s')
         );
     }
+    
+    /**
+     * Check and update status of all pending numbers
+     */
+    public function check_pending_numbers_status() {
+        global $wpdb;
+        
+        // Get all pending numbers
+        $pending_numbers = $wpdb->get_results(
+            "SELECT number_id FROM {$wpdb->prefix}havn_purchases 
+             WHERE status_number = 'PENDING' AND number_id IS NOT NULL"
+        );
+        
+        $updated_count = 0;
+        $refunded_count = 0;
+        
+        foreach ($pending_numbers as $number) {
+            try {
+                $status_result = $this->get_number_status($number->number_id);
+                
+                if (!empty($status_result) && isset($status_result['state'])) {
+                    $api_status = $status_result['state'];
+                    $local_status = $this->map_api_status_to_local_status($api_status);
+                    
+                    // Update status if changed
+                    if ($local_status !== 'PENDING') {
+                        $wpdb->update(
+                            $wpdb->prefix . 'havn_purchases',
+                            array(
+                                'status_number' => $local_status,
+                                'updated_at' => current_time('mysql')
+                            ),
+                            array('number_id' => $number->number_id),
+                            array('%s', '%s'),
+                            array('%s')
+                        );
+                        
+                        $updated_count++;
+                        
+                        // Process refund for canceled/refunded numbers
+                        if ($local_status === 'CANCELED' || $api_status === 'REFUNDED') {
+                            $purchase = $wpdb->get_row($wpdb->prepare(
+                                "SELECT * FROM {$wpdb->prefix}havn_purchases WHERE number_id = %s",
+                                $number->number_id
+                            ));
+                            
+                            if ($purchase) {
+                                $this->process_refund($purchase);
+                                $refunded_count++;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                // Log error but continue with other numbers
+                error_log("Error checking status for number {$number->number_id}: " . $e->getMessage());
+            }
+        }
+        
+        return array(
+            'updated_count' => $updated_count,
+            'refunded_count' => $refunded_count
+        );
+    }
 
     public function get_number_status($number_id) {
         $cache_key = false;
         $url = "/numbers/".$number_id."/state";
-        return $this->get_curl($url, $cache_key);
+        $result = $this->get_curl($url, $cache_key);
+        
+        // Update local status if API status is different
+        if (!empty($result) && isset($result['state'])) {
+            $this->update_number_status_from_api($number_id, $result['state']);
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Update number status from API response
+     */
+    private function update_number_status_from_api($number_id, $api_status) {
+        global $wpdb;
+        
+        $local_status = $this->map_api_status_to_local_status($api_status);
+        
+        // Get current purchase status
+        $purchase = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}havn_purchases WHERE number_id = %s",
+            $number_id
+        ));
+        
+        if (!$purchase) {
+            return;
+        }
+        
+        // Only update if status has changed
+        if ($purchase->status_number !== $local_status) {
+            $wpdb->update(
+                $wpdb->prefix . 'havn_purchases',
+                array(
+                    'status_number' => $local_status,
+                    'updated_at' => current_time('mysql')
+                ),
+                array('number_id' => $number_id),
+                array('%s', '%s'),
+                array('%s')
+            );
+            
+            // Process refund if status changed to CANCELED/REFUNDED
+            if (($local_status === 'CANCELED' || $api_status === 'REFUNDED') && $purchase->status_number === 'PENDING') {
+                $this->process_refund($purchase);
+            }
+        }
     }
     
     /**
@@ -379,13 +489,14 @@ class HAVN_API {
 		// Get user balance first
 		$user_balance = $this->get_user_balance($user_id);
 
-        $service_price *=10;
-		if ($user_balance < $service_price) {
+
+		if ($user_balance < ($service_price*10)) {
 			return array(
 				'success' => false,
 				'message' => 'موجودی کافی نیست'
 			);
 		}
+
 		
 		// Get service and country names for display
 		
@@ -502,6 +613,7 @@ class HAVN_API {
 	 */
 	private function deduct_user_balance($user_id, $amount, $service_id = '', $country_code = '') {
 
+        $amount *=10;
 		if (function_exists('woo_wallet') && isset(woo_wallet()->wallet)) {
 			$note = sprintf(
 				'خرید شماره مجازی - سرویس: %s | کشور: %s',
@@ -518,7 +630,7 @@ class HAVN_API {
 	 * Refund balance to user account using TeraWallet
 	 */
 	public function refund_user_balance($user_id, $amount, $service_id = '', $country_code = '', $reason = '') {
-
+        $amount *=10;
 		if (function_exists('woo_wallet') && isset(woo_wallet()->wallet)) {
 			$note = sprintf(
 				'بازگشت پول خرید شماره مجازی - سرویس: %s | کشور: %s | دلیل: %s',
@@ -597,7 +709,7 @@ class HAVN_API {
 				'number_id' => $number_id,
 				'number' => $number,
 				'cost' => $cost,
-				'status' => 'completed',
+				'status' => 'pending',
 				'api_response' => json_encode($api_response),
 				'updated_at' => current_time('mysql')
 			),
