@@ -613,7 +613,7 @@ class HAVN_API {
 	 */
 	private function deduct_user_balance($user_id, $amount, $service_id = '', $country_code = '') {
 
-        $amount *=10;
+        //$amount *=10;
 		if (function_exists('woo_wallet') && isset(woo_wallet()->wallet)) {
 			$note = sprintf(
 				'خرید شماره مجازی - سرویس: %s | کشور: %s',
@@ -630,7 +630,7 @@ class HAVN_API {
 	 * Refund balance to user account using TeraWallet
 	 */
 	public function refund_user_balance($user_id, $amount, $service_id = '', $country_code = '', $reason = '') {
-        $amount *=10;
+       // $amount *=10;
 		if (function_exists('woo_wallet') && isset(woo_wallet()->wallet)) {
 			$note = sprintf(
 				'بازگشت پول خرید شماره مجازی - سرویس: %s | کشور: %s | دلیل: %s',
