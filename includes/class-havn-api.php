@@ -97,6 +97,16 @@ class HAVN_API {
             update_option('havn_services_base_path', $result['base_path']);
         }
         
+        // Filter out "Full Rent" service
+        if (isset($result['info']) && is_array($result['info'])) {
+            $result['info'] = array_filter($result['info'], function($service) {
+                $serviceName = strtolower($service['service_full_name'] ?? $service['name'] ?? $service['id'] ?? '');
+                return $serviceName !== 'full rent';
+            });
+            // Re-index array after filtering
+            $result['info'] = array_values($result['info']);
+        }
+        
         return $result;
 	}
 
