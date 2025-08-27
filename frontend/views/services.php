@@ -34,7 +34,19 @@ $all_services_json = json_encode($services_list);
   <div class="rent-wrapper">
     <!-- Header -->
     <div class="rent-header">
-      <h1 class="rent-title"><?php echo esc_html(get_option('havn_page_title', 'شماره‌های مجازی')); ?></h1>
+      <div class="title-section">
+        <h1 class="rent-title"><?php echo esc_html(get_option('havn_page_title', 'شماره‌های مجازی')); ?></h1>
+        
+        <!-- Wallet Balance -->
+        <div class="wallet-balance">
+          <div class="balance-icon">💰</div>
+          <div class="balance-info">
+            <span class="balance-label">موجودی کیف پول:</span>
+            <span class="balance-amount" id="wallet-balance"><?php echo number_format(get_user_meta(get_current_user_id(), 'havn_balance', true) ?: 0, 0); ?> تومان</span>
+          </div>
+        </div>
+      </div>
+      
       <div class="search-box">
         <input type="text" id="havn-services-search" placeholder="جستجو در سرویس‌ها..." />
         <button class="clear-search" id="clear-search" style="display: none;">پاک کردن جستجو</button>

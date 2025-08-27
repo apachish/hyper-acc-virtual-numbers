@@ -599,7 +599,7 @@ class HAVN_API {
 	/**
 	 * Get user balance from TeraWallet
 	 */
-	private function get_user_balance($user_id) {
+	public function get_user_balance($user_id) {
 		if (function_exists('woo_wallet') && isset(woo_wallet()->wallet)) {
 			// 'edit' context returns numeric value
 			return (float) woo_wallet()->wallet->get_wallet_balance($user_id, 'edit');
@@ -630,7 +630,6 @@ class HAVN_API {
 	 * Refund balance to user account using TeraWallet
 	 */
 	public function refund_user_balance($user_id, $amount, $service_id = '', $country_code = '', $reason = '') {
-       // $amount *=10;
 		if (function_exists('woo_wallet') && isset(woo_wallet()->wallet)) {
 			$note = sprintf(
 				'بازگشت پول خرید شماره مجازی - سرویس: %s | کشور: %s | دلیل: %s',

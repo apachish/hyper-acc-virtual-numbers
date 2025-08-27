@@ -30,6 +30,9 @@ window.initServicesPage = function() {
     // Load user statistics
     loadUserStats();
     
+    // Load wallet balance
+    updateWalletBalance();
+    
     console.log('Services page initialized successfully');
 };
 
@@ -55,6 +58,38 @@ function loadUserStats() {
     })
     .catch(error => {
         console.error('Error loading user stats:', error);
+    });
+}
+
+// Update wallet balance display
+function updateWalletBalance() {
+    if (!havn_ajax.is_logged_in) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', 'havn_get_user_balance');
+    formData.append('nonce', havn_ajax.nonce);
+    
+    fetch(havn_ajax.ajax_url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const balanceElement = document.getElementById('wallet-balance');
+            if (balanceElement) {
+                const formattedBalance = new Intl.NumberFormat('fa-IR', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(data.data);
+                balanceElement.textContent = formattedBalance + ' تومان';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error loading wallet balance:', error);
     });
 }
 
@@ -672,33 +707,57 @@ function renderCountries(data, serviceId) {
 }
 
 // Search functionality
-const searchInput = document.getElementById('havn-services-search');
-const searchResultsInfo = document.getElementById('search-results-info');
-const searchResultsText = document.getElementById('search-results-text');
-const clearSearchBtn = document.getElementById('clear-search');
 let searchQuery = '';
 
 function attachSearchListeners() {
+    const searchInput = document.getElementById('havn-services-search');
+    const searchResultsInfo = document.getElementById('search-results-info');
+    const searchResultsText = document.getElementById('search-results-text');
+    const clearSearchBtn = document.getElementById('clear-search');
+    
+    console.log('Attaching search listeners...', {
+        searchInput: !!searchInput,
+        searchResultsInfo: !!searchResultsInfo,
+        searchResultsText: !!searchResultsText,
+        clearSearchBtn: !!clearSearchBtn
+    });
+    
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             searchQuery = this.value.trim().toLowerCase();
+            console.log('Search query:', searchQuery);
             performSearch();
         });
     }
 
     if (clearSearchBtn) {
         clearSearchBtn.addEventListener('click', function() {
-            searchInput.value = '';
+            if (searchInput) {
+                searchInput.value = '';
+            }
             searchQuery = '';
+            console.log('Search cleared');
             performSearch();
         });
     }
 }
 
 function performSearch() {
+    const searchResultsInfo = document.getElementById('search-results-info');
+    const searchResultsText = document.getElementById('search-results-text');
+    
+    console.log('Performing search:', {
+        searchQuery: searchQuery,
+        allServices: allServices ? allServices.length : 'undefined',
+        searchResultsInfo: !!searchResultsInfo,
+        searchResultsText: !!searchResultsText
+    });
+    
     if (!searchQuery && allServices) {
         renderServicesPage(allServices.slice((currentPage - 1) * perPage, currentPage * perPage), currentPage);
-        searchResultsInfo.classList.remove('show');
+        if (searchResultsInfo) {
+            searchResultsInfo.classList.remove('show');
+        }
         return;
     }
 
@@ -707,14 +766,24 @@ function performSearch() {
         return serviceName.indexOf(searchQuery) !== -1;
     });
 
+    console.log('Filtered services:', filteredServices.length);
+
     if (filteredServices.length > 0) {
         renderSearchResults(filteredServices);
-        searchResultsText.textContent = `${filteredServices.length} نتیجه برای "${searchQuery}" یافت شد`;
-        searchResultsInfo.classList.add('show');
+        if (searchResultsText) {
+            searchResultsText.textContent = `${filteredServices.length} نتیجه برای "${searchQuery}" یافت شد`;
+        }
+        if (searchResultsInfo) {
+            searchResultsInfo.classList.add('show');
+        }
     } else {
         renderSearchResults([]);
-        searchResultsText.textContent = `هیچ نتیجه‌ای برای "${searchQuery}" یافت نشد`;
-        searchResultsInfo.classList.add('show');
+        if (searchResultsText) {
+            searchResultsText.textContent = `هیچ نتیجه‌ای برای "${searchQuery}" یافت نشد`;
+        }
+        if (searchResultsInfo) {
+            searchResultsInfo.classList.add('show');
+        }
     }
 }
 
@@ -818,6 +887,8 @@ function confirmPurchase() {
                 viewService(serviceId);
                 // Update user statistics
                 loadUserStats();
+                // Update wallet balance
+                updateWalletBalance();
             } else {
                 showErrorModal('خطا: ' + (data.data || 'خطا در خرید شماره'));
             }

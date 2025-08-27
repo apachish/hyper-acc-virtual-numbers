@@ -19,6 +19,7 @@ class HAVN_Frontend {
         add_action('wp_ajax_havn_get_service_countries', array($this, 'ajax_get_service_countries'));
         add_action('wp_ajax_nopriv_havn_get_service_countries', array($this, 'ajax_get_service_countries'));
         add_action('wp_ajax_havn_get_user_stats', array($this, 'ajax_get_user_stats'));
+        add_action('wp_ajax_havn_get_user_balance', array($this, 'ajax_get_user_balance'));
         add_shortcode('havn_services', array($this, 'services_shortcode'));
         add_shortcode('havn_user_purchases', array($this, 'user_purchases_shortcode'));
     }
@@ -375,5 +376,22 @@ class HAVN_Frontend {
         $stats = HAVN_Rate_Limiter::get_user_stats($user_id);
         
         wp_send_json_success($stats);
+    }
+    
+    /**
+     * AJAX handler for getting user balance
+     */
+    public function ajax_get_user_balance() {
+        check_ajax_referer('havn_frontend_nonce', 'nonce');
+        
+        if (!is_user_logged_in()) {
+            wp_send_json_error('لطفاً ابتدا وارد شوید');
+        }
+        
+        $user_id = get_current_user_id();
+        $api = new HAVN_API();
+        $balance = $api->get_user_balance($user_id);
+        
+        wp_send_json_success($balance);
     }
 } 
