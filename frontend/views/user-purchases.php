@@ -17,7 +17,13 @@ if (!is_user_logged_in()) {
 
 // Get user data
 $user_id = get_current_user_id();
-$purchases = HAVN_Database::get_user_purchases($user_id, 'completed');
+$all_purchases = HAVN_Database::get_user_purchases($user_id, null);
+
+// Filter to show only completed and pending purchases
+$purchases = array_filter($all_purchases, function($purchase) {
+    return in_array($purchase->status, ['completed', 'pending']);
+});
+
 $has_purchases = !empty($purchases);
 
 // Initialize variables
