@@ -516,7 +516,7 @@ function renderServicesPage(services, page) {
             const logoUrl = serviceIcon ? (basePath + serviceIcon) : '';
 
             html += `
-          <div class="list-item" onclick="selectService('${service.service_short_name}')">
+          <div class="list-item" onclick="viewService('${service.service_short_name}')">
             <div class="service-info">
               <img src="${logoUrl}" alt="${serviceName}" class="service-logo" onerror="this.style.display='none'">
               <div class="service-details">
@@ -594,17 +594,18 @@ function changePage(page) {
     window.history.pushState({}, '', `?page=${page}`);
 }
 
-// Select service
-function selectService(serviceShortName) {
-    const items = document.querySelectorAll('.list-item');
-    items.forEach(item => item.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    currentService = serviceShortName;
-}
+
 
 // View service countries
 function viewService(serviceShortName) {
     currentService = serviceShortName;
+    
+    // Add active class to clicked item
+    const items = document.querySelectorAll('.list-item');
+    items.forEach(item => item.classList.remove('active'));
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
 
     // Show loading
     document.getElementById('countries-table').innerHTML = `
@@ -800,7 +801,7 @@ function renderSearchResults(filteredServices) {
             const logoUrl = serviceIcon ? (basePath + serviceIcon) : '';
 
             html += `
-          <div class="list-item" onclick="selectService('${service.service_short_name}')">
+          <div class="list-item" onclick="viewService('${service.service_short_name}')">
             <div class="service-info">
               <img src="${logoUrl}" alt="${serviceName}" class="service-logo" onerror="this.style.display='none'">
               <div class="service-details">
