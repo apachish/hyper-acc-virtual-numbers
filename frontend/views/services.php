@@ -38,13 +38,13 @@ $all_services_json = json_encode($services_list);
         <h1 class="rent-title"><?php echo esc_html(get_option('havn_page_title', 'شماره‌های مجازی')); ?></h1>
         
         <!-- Wallet Balance -->
-        <div class="wallet-balance">
+        <a href="https://Hyper-acc.com/wallet" target="_blank" class="wallet-balance">
           <div class="balance-icon">💰</div>
           <div class="balance-info">
             <span class="balance-label">موجودی کیف پول:</span>
             <span class="balance-amount" id="wallet-balance"><?php echo number_format(get_user_meta(get_current_user_id(), 'havn_balance', true) ?: 0, 0); ?> تومان</span>
           </div>
-        </div>
+        </a>
       </div>
       
       <div class="search-box">

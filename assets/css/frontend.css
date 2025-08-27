@@ -702,6 +702,9 @@
   transition: all 0.3s ease !important;
   max-width: fit-content !important;
   flex-shrink: 0 !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  cursor: pointer !important;
 }
 
 .havn-virtual-numbers-container .wallet-balance:hover {
