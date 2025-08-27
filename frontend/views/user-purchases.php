@@ -667,22 +667,7 @@ function filterServices(searchTerm) {
     }
 }
 
-function clearSearch() {
-    // Clear search input
-    const searchInput = document.getElementById('havn-services-search');
-    if (searchInput) {
-        searchInput.value = '';
-    }
-    
-    // Reset to original services
-    filterServices('');
-    
-    // Hide search results info
-    const searchInfo = document.getElementById('search-results-info');
-    if (searchInfo) {
-        searchInfo.style.display = 'none';
-    }
-}
+// clearSearch function is defined in shortcode
 
 function filterCountries(searchTerm) {
     if (!currentService || !currentService.purchases) {

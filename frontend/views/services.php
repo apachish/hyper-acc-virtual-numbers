@@ -49,7 +49,7 @@ $all_services_json = json_encode($services_list);
       
       <div class="search-box">
         <input type="text" id="havn-services-search" placeholder="جستجو در سرویس‌ها..." />
-        <button class="clear-search" id="clear-search" style="display: none;">پاک کردن جستجو</button>
+        <button class="clear-search" id="clear-search" style="display: none;" onclick="document.getElementById('havn-services-search').value=''; document.getElementById('havn-services-search').focus(); if(typeof performSearch === 'function') performSearch();">پاک کردن جستجو</button>
         <button class="info-btn" id="info-btn" onclick="openModal()" title="اطلاعات">i</button>
       </div>
     </div>
@@ -83,10 +83,7 @@ $all_services_json = json_encode($services_list);
       <input type="hidden" value="<?php echo get_option('havn_usd_rate', 50000); ?>" id="havn_usd_rate">
       <input type="hidden" value="<?php echo get_option('havn_profit_margin', 10); ?>" id="havn_profit_margin">
     <!-- Search Results Info -->
-    <div class="search-results-info" id="search-results-info">
-      <button class="clear-search" id="clear-search">پاک کردن جستجو</button>
-      <span id="search-results-text"></span>
-    </div>
+
 
     <!-- Main Content -->
     <div class="rent-body" id="main-content">
@@ -217,38 +214,19 @@ window.havnUsdRate = <?php echo get_option('havn_usd_rate', 50000); ?>;
 window.havnProfitMargin = <?php echo get_option('havn_profit_margin', 10); ?>;
 
 // Initialize
-document.addEventListener('DOMContentLoaded', function() {
+// Wait for scripts to load
+function waitForScripts() {
     if (typeof window.initServicesPage === 'function') {
         window.initServicesPage();
     } else {
-        console.error('initServicesPage function not found');
-        // Fallback: manually render services
-        if (window.allServices && window.allServices.length > 0) {
-            const container = document.getElementById('services-container');
-            let html = '';
-            window.allServices.slice(0, 20).forEach(service => {
-                const serviceName = service.service_full_name || service.name || service.id || '';
-                const serviceIcon = service.service_icon || '';
-                const logoUrl = serviceIcon ? (window.basePath + serviceIcon) : '';
-
-                html += `
-                    <div class="list-item" onclick="selectService('${service.service_short_name}')">
-                        <div class="service-info">
-                            <img src="${logoUrl}" alt="${serviceName}" class="service-logo" onerror="this.style.display='none'">
-                            <div class="service-details">
-                                <div class="service-name">${serviceName}</div>
-                                <div class="service-status">سرویس فعال</div>
-                            </div>
-                        </div>
-                        <button class="view-btn" onclick="event.stopPropagation(); viewService('${service.service_short_name}')">
-                            مشاهده 👁
-                        </button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
+        console.log('Waiting for scripts to load...');
+        setTimeout(waitForScripts, 100);
     }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for the script to load
+    setTimeout(waitForScripts, 100);
     
     // Add event listener for modal overlay
     const modal = document.getElementById('info-modal');

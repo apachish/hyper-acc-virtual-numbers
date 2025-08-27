@@ -17,10 +17,10 @@ window.initServicesPage = function() {
         basePath = window.basePath;
     }
     if (window.havnUsdRate) {
-        havnUsdRate = window.havnUsdRate;
+        window.havnUsdRate = window.havnUsdRate;
     }
     if (window.havnProfitMargin) {
-        havnProfitMargin = window.havnProfitMargin;
+        window.havnProfitMargin = window.havnProfitMargin;
     }
     
     // Initialize the page
@@ -493,13 +493,7 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-// Global variables
-let allServices = document.getElementById('all_services_json').value;
-
-let currentPage = 1;
-let perPage = 20;
-let basePath = document.getElementById('base_path_js').value;
-let currentService = null;
+// Global variables - will be defined in shortcode
 
 // Render services page
 function renderServicesPage(services, page) {
@@ -707,8 +701,7 @@ function renderCountries(data, serviceId) {
     document.getElementById('countries-table').innerHTML = html;
 }
 
-// Search functionality
-let searchQuery = '';
+// Search functionality - searchQuery will be defined in shortcode
 
 function attachSearchListeners() {
     const searchInput = document.getElementById('havn-services-search');
@@ -720,7 +713,7 @@ function attachSearchListeners() {
         searchInput: !!searchInput,
         searchResultsInfo: !!searchResultsInfo,
         searchResultsText: !!searchResultsText,
-        clearSearchBtn: !!clearSearchBtn
+        ngBtn: !!clearSearchBtn
     });
     
     if (searchInput) {
@@ -732,20 +725,40 @@ function attachSearchListeners() {
     }
 
     if (clearSearchBtn) {
-        clearSearchBtn.addEventListener('click', function() {
-            if (searchInput) {
-                searchInput.value = '';
+        clearSearchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (typeof clearSearch === 'function') {
+                clearSearch();
+            } else {
+                // Fallback if clearSearch is not defined
+                if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.focus();
+                }
+                if (typeof searchQuery !== 'undefined') {
+                    searchQuery = '';
+                }
+                if (typeof performSearch === 'function') {
+                    performSearch();
+                }
             }
-            searchQuery = '';
-            console.log('Search cleared');
-            performSearch();
         });
     }
 }
 
+// Clear search function - will be defined in shortcode
+
+// Also attach listeners when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    attachSearchListeners();
+});
+
 function performSearch() {
     const searchResultsInfo = document.getElementById('search-results-info');
     const searchResultsText = document.getElementById('search-results-text');
+    const clearSearchBtn = document.getElementById('clear-search');
     
     console.log('Performing search:', {
         searchQuery: searchQuery,
@@ -753,6 +766,15 @@ function performSearch() {
         searchResultsInfo: !!searchResultsInfo,
         searchResultsText: !!searchResultsText
     });
+    
+    // Show/hide clear search button
+    if (clearSearchBtn) {
+        if (searchQuery && searchQuery.length > 0) {
+            clearSearchBtn.style.display = 'block';
+        } else {
+            clearSearchBtn.style.display = 'none';
+        }
+    }
     
     if (!searchQuery && allServices) {
         renderServicesPage(allServices.slice((currentPage - 1) * perPage, currentPage * perPage), currentPage);

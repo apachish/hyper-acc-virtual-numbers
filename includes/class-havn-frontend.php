@@ -22,6 +22,9 @@ class HAVN_Frontend {
         add_action('wp_ajax_havn_get_user_balance', array($this, 'ajax_get_user_balance'));
         add_shortcode('havn_services', array($this, 'services_shortcode'));
         add_shortcode('havn_user_purchases', array($this, 'user_purchases_shortcode'));
+        
+        // Force enqueue scripts when shortcodes are used
+        add_action('wp_footer', array($this, 'maybe_enqueue_scripts'));
     }
     
     /**
@@ -29,10 +32,30 @@ class HAVN_Frontend {
      */
     public function enqueue_scripts() {
         wp_enqueue_script('jquery');
-        wp_enqueue_script('havn-frontend', HAVN_PLUGIN_URL . 'assets/js/frontend.js', array('jquery'), '1.1.4', true);
-        wp_enqueue_style('havn-frontend', HAVN_PLUGIN_URL . 'assets/css/frontend.css', array(), HAVN_VERSION);
         
-        wp_localize_script('havn-frontend', 'havn_ajax', array(
+        // Register CSS
+        wp_register_style(
+            'havn-frontend-css',
+            HAVN_PLUGIN_URL . 'assets/css/frontend.css',
+            array(),
+            filemtime(HAVN_PLUGIN_DIR . 'assets/css/frontend.css')
+        );
+        
+        // Register JS
+        wp_register_script(
+            'havn-frontend-js',
+            HAVN_PLUGIN_URL . 'assets/js/frontend.js',
+            array('jquery'),
+            filemtime(HAVN_PLUGIN_DIR . 'assets/js/frontend.js'),
+            true
+        );
+        
+        // Enqueue CSS and JS
+        wp_enqueue_style('havn-frontend-css');
+        wp_enqueue_script('havn-frontend-js');
+        
+        // Localize script
+        wp_localize_script('havn-frontend-js', 'havn_ajax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('havn_frontend_nonce'),
             'user_id' => get_current_user_id(),
@@ -41,6 +64,32 @@ class HAVN_Frontend {
         ));
     }
     
+    /**
+     * Maybe enqueue scripts if shortcodes are used
+     */
+    public function maybe_enqueue_scripts() {
+        global $post;
+        
+        // Check if we're on a page with shortcodes
+        $has_shortcode = false;
+        
+        if (is_a($post, 'WP_Post')) {
+            $has_shortcode = has_shortcode($post->post_content, 'havn_services') || 
+                           has_shortcode($post->post_content, 'havn_user_purchases');
+        }
+        
+        // Also check if we're on specific pages
+        if (!$has_shortcode) {
+            $current_url = $_SERVER['REQUEST_URI'] ?? '';
+            $has_shortcode = strpos($current_url, 'virtual-numbers') !== false ||
+                           strpos($current_url, 'user-purchases') !== false;
+        }
+        
+        if ($has_shortcode) {
+            $this->enqueue_scripts();
+        }
+    }
+
     /**
      * Services shortcode
      */
@@ -56,10 +105,85 @@ class HAVN_Frontend {
             return '<p>خطا در دریافت لیست سرویس‌ها</p>';
         }
         
+        // Add JavaScript inline to ensure it works with lazy loading
+        $js_content = file_get_contents(HAVN_PLUGIN_DIR . 'assets/js/frontend.js');
+        
+        // Add havn_ajax object
+        $ajax_data = array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('havn_frontend_nonce'),
+            'user_id' => get_current_user_id(),
+            'is_logged_in' => is_user_logged_in(),
+            'plugin_url' => HAVN_PLUGIN_URL,
+        );
+        
+        $localized_js = 'var havn_ajax = ' . json_encode($ajax_data) . ';' . PHP_EOL . $js_content;
+        
+        // Add global variables and clearSearch function for services page
+        $clear_search_js = '
+        // Prevent duplicate variable declarations
+        if (typeof allServices === "undefined") {
+            var allServices = [];
+        }
+        if (typeof currentPage === "undefined") {
+            var currentPage = 1;
+        }
+        if (typeof perPage === "undefined") {
+            var perPage = 20;
+        }
+        if (typeof basePath === "undefined") {
+            var basePath = "";
+        }
+        if (typeof currentService === "undefined") {
+            var currentService = null;
+        }
+        if (typeof searchQuery === "undefined") {
+            var searchQuery = "";
+        }
+        
+        function clearSearch() {
+            const searchInput = document.getElementById("havn-services-search");
+            if (searchInput) {
+                searchInput.value = "";
+                searchInput.focus();
+            }
+            if (typeof searchQuery !== "undefined") {
+                searchQuery = "";
+            }
+            if (typeof performSearch === "function") {
+                performSearch();
+            }
+        }
+        
+        // Show/hide clear search button
+        function updateClearSearchButton() {
+            const clearSearchBtn = document.getElementById("clear-search");
+            const searchInput = document.getElementById("havn-services-search");
+            if (clearSearchBtn && searchInput) {
+                if (searchInput.value && searchInput.value.length > 0) {
+                    clearSearchBtn.style.display = "block";
+                } else {
+                    clearSearchBtn.style.display = "none";
+                }
+            }
+        }
+        
+        // Add event listener to search input
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById("havn-services-search");
+            if (searchInput) {
+                searchInput.addEventListener("input", updateClearSearchButton);
+            }
+        });
+        ';
+        
+        $localized_js = $clear_search_js . PHP_EOL . $localized_js;
+        
         // Provide helper to view
         $frontend = $this;
         
         ob_start();
+        echo '<script>' . $localized_js . '</script>';
         include HAVN_PLUGIN_DIR . 'frontend/views/services.php';
         return ob_get_clean();
     }
@@ -75,10 +199,72 @@ class HAVN_Frontend {
         $user_id = get_current_user_id();
         $purchases = HAVN_Database::get_purchases(array('user_id' => $user_id));
         
+        // Add JavaScript inline to ensure it works with lazy loading
+        $js_content = file_get_contents(HAVN_PLUGIN_DIR . 'assets/js/frontend.js');
+        
+        // Add havn_ajax object
+        $ajax_data = array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('havn_frontend_nonce'),
+            'user_id' => get_current_user_id(),
+            'is_logged_in' => is_user_logged_in(),
+            'plugin_url' => HAVN_PLUGIN_URL,
+        );
+        
+        $localized_js = 'var havn_ajax = ' . json_encode($ajax_data) . ';' . PHP_EOL . $js_content;
+        
+        // Add clearSearch function and show/hide logic directly
+        $clear_search_js = '
+        function clearSearch() {
+            const searchInput = document.getElementById("havn-services-search");
+            if (searchInput) {
+                searchInput.value = "";
+                searchInput.focus();
+            }
+            if (typeof searchQuery !== "undefined") {
+                searchQuery = "";
+            }
+            if (typeof performSearch === "function") {
+                performSearch();
+            }
+        }
+        
+        // Override performSearch to show/hide clear button
+        function originalPerformSearch() {
+            if (typeof performSearch === "function") {
+                return performSearch.apply(this, arguments);
+            }
+        }
+        
+        // Show/hide clear search button
+        function updateClearSearchButton() {
+            const clearSearchBtn = document.getElementById("clear-search");
+            const searchInput = document.getElementById("havn-services-search");
+            if (clearSearchBtn && searchInput) {
+                if (searchInput.value && searchInput.value.length > 0) {
+                    clearSearchBtn.style.display = "block";
+                } else {
+                    clearSearchBtn.style.display = "none";
+                }
+            }
+        }
+        
+        // Add event listener to search input
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById("havn-services-search");
+            if (searchInput) {
+                searchInput.addEventListener("input", updateClearSearchButton);
+            }
+        });
+        ';
+        
+        $localized_js = $clear_search_js . PHP_EOL . $localized_js;
+        
         // Provide helper to view
         $frontend = $this;
         
         ob_start();
+        echo '<script>' . $localized_js . '</script>';
         include HAVN_PLUGIN_DIR . 'frontend/views/user-purchases.php';
         return ob_get_clean();
     }
