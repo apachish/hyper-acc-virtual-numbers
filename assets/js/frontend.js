@@ -860,7 +860,7 @@ function attachSearchListeners() {
 
 // Also attach listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    attachSearchListeners();
+    // attachSearchListeners();
 });
 
 function performSearch() {
@@ -954,7 +954,7 @@ function renderSearchResults(filteredServices) {
     }
 
     container.innerHTML = html;
-    attachSearchListeners();
+    // attachSearchListeners();
 }
 
 // Purchase number function
