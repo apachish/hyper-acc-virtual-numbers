@@ -503,7 +503,7 @@ class HAVN_API {
 		$user_balance = $this->get_user_balance($user_id);
 
 
-		if ($user_balance < ($service_price*10)) {
+		if ($user_balance < $service_price) {
 			return array(
 				'success' => false,
 				'message' => 'موجودی کافی نیست'
