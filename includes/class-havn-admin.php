@@ -82,6 +82,7 @@ class HAVN_Admin {
         register_setting('havn_settings', 'havn_info_text');
         register_setting('havn_settings', 'havn_services_base_path');
         register_setting('havn_settings', 'havn_countries_base_path');
+        register_setting('havn_settings', 'havn_buy_page_url');
         
         add_settings_section(
             'havn_general_settings',
@@ -158,6 +159,14 @@ class HAVN_Admin {
             'havn_countries_base_path',
             'آدرس پایه پرچم کشورها',
             array($this, 'countries_base_path_field_callback'),
+            'havn-settings',
+            'havn_general_settings'
+        );
+        
+        add_settings_field(
+            'havn_buy_page_url',
+            'آدرس صفحه خرید شماره مجازی',
+            array($this, 'buy_page_url_field_callback'),
             'havn-settings',
             'havn_general_settings'
         );
@@ -270,6 +279,12 @@ class HAVN_Admin {
         $value = get_option('havn_countries_base_path', 'https://nerd-peek.ams3.cdn.digitaloceanspaces.com/Virtunum/countries-flag');
         echo '<input type="url" name="havn_countries_base_path" value="' . esc_attr($value) . '" class="regular-text" />';
         echo '<p class="description">آدرس پایه برای پرچم کشورها (بدون / در انتها)</p>';
+    }
+    
+    public function buy_page_url_field_callback() {
+        $value = get_option('havn_buy_page_url', home_url('/?page_id=29'));
+        echo '<input type="url" name="havn_buy_page_url" value="' . esc_attr($value) . '" class="regular-text" />';
+        echo '<p class="description">آدرس کامل صفحه خرید شماره مجازی که در دکمه "خرید شماره مجازی" استفاده می‌شود</p>';
     }
     
     /**

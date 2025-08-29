@@ -95,8 +95,9 @@ if ($has_purchases) {
     <!-- Hidden Data for JavaScript -->
     <div class="hidden-data">
       <input type="hidden" value="" id="base_path_js">
-      <input type="hidden" id="all_services_json" value='<?php echo $all_services_json; ?>'>
-      <input type="hidden" value="<?php echo get_option('havn_usd_rate', 50000); ?>" id="havn_usd_rate">
+        <textarea style="display: none"  id="all_services_json"><?php echo esc_html($all_services_json); ?></textarea>
+
+        <input type="hidden" value="<?php echo get_option('havn_usd_rate', 50000); ?>" id="havn_usd_rate">
       <input type="hidden" value="<?php echo get_option('havn_profit_margin', 10); ?>" id="havn_profit_margin">
     </div>
     
@@ -152,7 +153,7 @@ if ($has_purchases) {
           <i class="fas fa-phone-slash"></i>
           <h2>شما هنوز خریدی نداشته‌اید</h2>
           <p>برای شروع خرید شماره مجازی، روی دکمه زیر کلیک کنید</p>
-          <a href="<?php echo home_url('/?page_id=29'); ?>" class="havn-buy-button">خرید شماره مجازی</a>
+          <a href="<?php echo esc_url(get_option('havn_buy_page_url', home_url('/?page_id=29'))); ?>" class="havn-buy-button">خرید شماره مجازی</a>
         </div>
       </div>
       <?php endif; ?>
@@ -186,11 +187,7 @@ if ($has_purchases) {
 </div>
 
 <script>
-// Global variables
-let allServices = [];
-let currentPage = 1;
-let perPage = 20;
-let currentService = null;
+// Global variables are defined in shortcode
 const ajaxurl = '<?php echo admin_url('admin-ajax.php'); ?>';
 
 // Initialize page
@@ -201,29 +198,48 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initUserPurchasesPage() {
+    // Initialize global variables if not defined
+    if (typeof window.allServices === 'undefined') {
+        window.allServices = [];
+    }
+    if (typeof window.currentPage === 'undefined') {
+        window.currentPage = 1;
+    }
+    if (typeof window.perPage === 'undefined') {
+        window.perPage = 20;
+    }
+    if (typeof window.currentService === 'undefined') {
+        window.currentService = null;
+    }
+    
     // Load services data
     const servicesJsonElement = document.getElementById('all_services_json');
     if (!servicesJsonElement) {
+        console.log('all_services_json element not found');
         return;
     }
     
-    const servicesJson = servicesJsonElement.value;
+    const servicesJson = servicesJsonElement.textContent || servicesJsonElement.value;
+    console.log('Services JSON:', servicesJson.substring(0, 100) + '...');
     
-    if (!servicesJson || servicesJson.trim() === '') {
-        allServices = [];
+    if (!servicesJson || servicesJson.trim() === '' || servicesJson.trim() === '[]') {
+        window.allServices = [];
+        console.log('No services data found');
         return;
     }
     
     try {
-        allServices = JSON.parse(servicesJson);
+        window.allServices = JSON.parse(servicesJson);
+        console.log('Parsed services:', window.allServices.length, 'services found');
     } catch (error) {
-        allServices = [];
+        console.error('Error parsing services JSON:', error);
+        window.allServices = [];
         return;
     }
-    
+
     // Initialize page
-    if (allServices.length > 0) {
-        renderServicesPage();
+    if (window.allServices.length > 0) {
+        renderServicesPageUser();
     } else {
         const container = document.getElementById('services-container');
         if (container) {
@@ -255,15 +271,18 @@ function initUserPurchasesPage() {
     }
 }
 
-function renderServicesPage() {
+function renderServicesPageUser() {
     // If services count is less than perPage, show all services
     let servicesToShow;
-    if (allServices.length <= perPage) {
-        servicesToShow = allServices;
+    console.log("render")
+
+    if (window.allServices.length <= window.perPage) {
+        servicesToShow = window.allServices;
+        console.log(servicesToShow)
     } else {
-        const startIndex = (currentPage - 1) * perPage;
-        const endIndex = startIndex + perPage;
-        servicesToShow = allServices.slice(startIndex, endIndex);
+        const startIndex = (window.currentPage - 1) * window.perPage;
+        const endIndex = startIndex + window.perPage;
+        servicesToShow = window.allServices.slice(startIndex, endIndex);
     }
     
     const container = document.getElementById('services-container');
@@ -287,6 +306,8 @@ function renderServicesPage() {
     servicesToShow.forEach(service => {
         const serviceElement = document.createElement('div');
         serviceElement.className = 'list-item service-item';
+        serviceElement.style.cursor = 'pointer';
+        serviceElement.onclick = () => showCountries(service.service_id);
         serviceElement.innerHTML = `
             <div class="service-info">
                 <div class="service-icon-wrapper">
@@ -306,7 +327,7 @@ function renderServicesPage() {
                 </div>
             </div>
             <div class="service-actions">
-                <button class="view-btn primary-btn" onclick="showCountries('${service.service_id}')">
+                <button class="view-btn primary-btn" onclick="event.stopPropagation(); showCountries('${service.service_id}')">
                     <i class="fas fa-eye"></i>
                     مشاهده
                 </button>
@@ -316,16 +337,16 @@ function renderServicesPage() {
     });
     
     // Update pagination only if needed
-    if (allServices.length > perPage) {
+    if (window.allServices.length > window.perPage) {
         updatePagination();
         updatePaginationInfo();
     }
 }
 
 function showCountries(serviceId) {
-    currentService = allServices.find(s => s.service_id === serviceId);
+    window.currentService = window.allServices.find(s => s.service_id === serviceId);
     
-    if (!currentService) {
+    if (!window.currentService) {
         return;
     }
     
@@ -336,10 +357,10 @@ function showCountries(serviceId) {
     
     if (servicesSection) servicesSection.style.display = 'none';
     if (countriesSection) countriesSection.style.display = 'block';
-    if (selectedServiceName) selectedServiceName.textContent = currentService.service_name;
+    if (selectedServiceName) selectedServiceName.textContent = window.currentService.service_name;
     
     // Render countries
-    renderCountries();
+    renderCountriesUser();
     
     // Add search functionality for countries
     const countriesSearchInput = document.getElementById('countries-search');
@@ -351,7 +372,7 @@ function showCountries(serviceId) {
     }
 }
 
-function renderCountries() {
+function renderCountriesUser() {
     const container = document.getElementById('countries-container');
     if (!container) {
         return;
@@ -359,7 +380,7 @@ function renderCountries() {
     
     container.innerHTML = '';
     
-    if (!currentService || !currentService.purchases || currentService.purchases.length === 0) {
+    if (!window.currentService || !window.currentService.purchases || window.currentService.purchases.length === 0) {
         container.innerHTML = `
             <div class="havn-no-purchases">
                 <i class="fas fa-phone-slash"></i>
@@ -369,7 +390,7 @@ function renderCountries() {
         return;
     }
     
-    currentService.purchases.forEach(purchase => {
+    window.currentService.purchases.forEach(purchase => {
         const countryElement = document.createElement('div');
         countryElement.className = 'list-item country-item';
         
@@ -397,8 +418,8 @@ function renderCountries() {
             const purchaseTime = new Date(purchase.created_at);
             const currentTime = new Date();
             const timeDiff = (currentTime - purchaseTime) / (1000 * 60); // minutes
-            
-            if (timeDiff >= 5) {
+            console.log(timeDiff);
+            if (timeDiff <= 5) {
                 shouldShowCancel = true;
             }
         }
@@ -431,10 +452,15 @@ function renderCountries() {
                     <div></div>
                 ` : purchase.number_id ? `
                     ${shouldShowCancel ? `
+                 <button class="view-btn primary-btn" style="margin-bottom: 10px" onclick="getCodes('${purchase.number_id}', this)">
+                            <i class="fas fa-key"></i>
+                            دریافت کد
+                        </button>
                         <button class="view-btn danger-btn" onclick="cancelNumber('${purchase.number_id}', this)">
                             <i class="fas fa-times"></i>
                             لغو شماره
                         </button>
+
                     ` : hasExistingCode ? `
                         <div class="existing-code-display">
                             <span class="code-text">${existingCode}</span>
@@ -592,7 +618,7 @@ function getCodes(numberId, button) {
 }
 
 function filterServices(searchTerm) {
-    const filteredServices = allServices.filter(service => {
+    const filteredServices = window.allServices.filter(service => {
         // Search in service name
         const serviceNameMatch = service.service_name.toLowerCase().includes(searchTerm.toLowerCase());
         
@@ -628,6 +654,8 @@ function filterServices(searchTerm) {
     filteredServices.forEach(service => {
         const serviceElement = document.createElement('div');
         serviceElement.className = 'list-item service-item';
+        serviceElement.style.cursor = 'pointer';
+        serviceElement.onclick = () => showCountries(service.service_id);
         serviceElement.innerHTML = `
             <div class="service-info">
                 <div class="service-icon-wrapper">
@@ -647,7 +675,7 @@ function filterServices(searchTerm) {
                 </div>
             </div>
             <div class="service-actions">
-                <button class="view-btn primary-btn" onclick="showCountries('${service.service_id}')">
+                <button class="view-btn primary-btn" onclick="event.stopPropagation(); showCountries('${service.service_id}')">
                     <i class="fas fa-eye"></i>
                     مشاهده
                 </button>
@@ -670,11 +698,11 @@ function filterServices(searchTerm) {
 // clearSearch function is defined in shortcode
 
 function filterCountries(searchTerm) {
-    if (!currentService || !currentService.purchases) {
+    if (!window.currentService || !window.currentService.purchases) {
         return;
     }
     
-    const filteredPurchases = currentService.purchases.filter(purchase => 
+    const filteredPurchases = window.currentService.purchases.filter(purchase => 
         purchase.country_code.toLowerCase().includes(searchTerm) ||
         purchase.number.includes(searchTerm) ||
         (purchase.status_number && purchase.status_number.toLowerCase().includes(searchTerm))
@@ -867,15 +895,15 @@ function cancelNumber(numberId, button) {
 }
 
 function changePage(page) {
-    const totalPages = Math.ceil(allServices.length / perPage);
+    const totalPages = Math.ceil(window.allServices.length / window.perPage);
     if (page < 1 || page > totalPages || totalPages <= 1) return;
     
-    currentPage = page;
-    renderServicesPage();
+    window.currentPage = page;
+    renderServicesPageUser();
 }
 
 function updatePagination() {
-    const totalPages = Math.ceil(allServices.length / perPage);
+    const totalPages = Math.ceil(window.allServices.length / window.perPage);
     const pageNumbers = document.getElementById('page-numbers');
     
     if (!pageNumbers || totalPages <= 1) return;
@@ -883,8 +911,8 @@ function updatePagination() {
     pageNumbers.innerHTML = '';
     
     // Show max 3 page numbers
-    let startPage = Math.max(1, currentPage - 1);
-    let endPage = Math.min(totalPages, currentPage + 1);
+    let startPage = Math.max(1, window.currentPage - 1);
+    let endPage = Math.min(totalPages, window.currentPage + 1);
     
     if (endPage - startPage < 2) {
         if (startPage === 1) {
@@ -896,7 +924,7 @@ function updatePagination() {
     
     for (let i = startPage; i <= endPage; i++) {
         const pageBtn = document.createElement('button');
-        pageBtn.className = `btn small ${i === currentPage ? 'active' : ''}`;
+        pageBtn.className = `btn small ${i === window.currentPage ? 'active' : ''}`;
         pageBtn.textContent = i;
         pageBtn.onclick = () => changePage(i);
         pageNumbers.appendChild(pageBtn);
@@ -905,20 +933,20 @@ function updatePagination() {
     // Update prev/next buttons
     const prevBtn = document.getElementById('prev-page');
     const nextBtn = document.getElementById('next-page');
-    if (prevBtn) prevBtn.disabled = currentPage === 1;
-    if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+    if (prevBtn) prevBtn.disabled = window.currentPage === 1;
+    if (nextBtn) nextBtn.disabled = window.currentPage === totalPages;
 }
 
 function updatePaginationInfo() {
-    const totalServices = allServices.length;
+    const totalServices = window.allServices.length;
     const paginationInfo = document.getElementById('pagination-info');
     
     if (paginationInfo) {
-        if (totalServices <= perPage) {
+        if (totalServices <= window.perPage) {
             paginationInfo.textContent = `نمایش ${totalServices} سرویس`;
         } else {
-            const startIndex = (currentPage - 1) * perPage + 1;
-            const endIndex = Math.min(currentPage * perPage, totalServices);
+            const startIndex = (window.currentPage - 1) * window.perPage + 1;
+            const endIndex = Math.min(window.currentPage * window.perPage, totalServices);
             paginationInfo.textContent = `نمایش ${startIndex} تا ${endIndex} از ${totalServices} سرویس`;
         }
     }

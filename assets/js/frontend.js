@@ -2,9 +2,77 @@
  * Frontend JavaScript
  */
 
+// Loading functions
+function showLoading(message = 'در حال بارگذاری...') {
+    const loadingOverlay = document.getElementById('havn-loading-overlay');
+    const loadingText = loadingOverlay ? loadingOverlay.querySelector('.loading-text') : null;
+    
+    if (loadingOverlay) {
+        if (loadingText) {
+            loadingText.textContent = message;
+        }
+        loadingOverlay.classList.add('show');
+        loadingOverlay.style.display = 'flex';
+        loadingOverlay.style.visibility = 'visible';
+        loadingOverlay.style.opacity = '1';
+        loadingOverlay.style.zIndex = '9999';
+    }
+}
+
+function hideLoading() {
+    const loadingOverlay = document.getElementById('havn-loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('show');
+        loadingOverlay.style.display = 'none';
+        loadingOverlay.style.visibility = 'hidden';
+        loadingOverlay.style.opacity = '0';
+        loadingOverlay.style.zIndex = '-1';
+    }
+    
+    // Also try to hide any loading with class
+    const loadingElements = document.querySelectorAll('.havn-loading-overlay');
+    loadingElements.forEach(element => {
+        element.classList.remove('show');
+        element.style.display = 'none';
+        element.style.visibility = 'hidden';
+        element.style.opacity = '0';
+        element.style.zIndex = '-1';
+    });
+}
+
+// Hide loading on page load
+document.addEventListener('DOMContentLoaded', function() {
+    hideLoading();
+});
+
+// Hide loading on window load (backup)
+window.addEventListener('load', function() {
+    hideLoading();
+});
+
+// Emergency hide loading after 10 seconds
+setTimeout(function() {
+    hideLoading();
+}, 10000);
+
+// Add click to hide loading functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const loadingOverlay = document.getElementById('havn-loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.addEventListener('click', function(e) {
+            if (e.target === loadingOverlay) {
+                hideLoading();
+            }
+        });
+    }
+});
+
 // Initialize services page
 window.initServicesPage = function() {
     console.log('Initializing services page...');
+    
+    // Hide loading overlay on page load
+    hideLoading();
     
     // Get data from PHP
     if (window.allServices) {
@@ -39,8 +107,11 @@ window.initServicesPage = function() {
 // Load user statistics
 function loadUserStats() {
     if (!havn_ajax.is_logged_in) {
+        hideLoading(); // Hide loading if user not logged in
         return;
     }
+    
+    showLoading('در حال بارگذاری آمار کاربر...');
     
     const formData = new FormData();
     formData.append('action', 'havn_get_user_stats');
@@ -55,17 +126,22 @@ function loadUserStats() {
         if (data.success) {
             updateUserLimitsDisplay(data.data);
         }
+        hideLoading();
     })
     .catch(error => {
         console.error('Error loading user stats:', error);
+        hideLoading();
     });
 }
 
 // Update wallet balance display
 function updateWalletBalance() {
     if (!havn_ajax.is_logged_in) {
+        hideLoading(); // Hide loading if user not logged in
         return;
     }
+    
+    showLoading('در حال بارگذاری موجودی کیف پول...');
     
     const formData = new FormData();
     formData.append('action', 'havn_get_user_balance');
@@ -87,9 +163,11 @@ function updateWalletBalance() {
                 balanceElement.textContent = formattedBalance + ' تومان';
             }
         }
+        hideLoading();
     })
     .catch(error => {
         console.error('Error loading wallet balance:', error);
+        hideLoading();
     });
 }
 
@@ -493,21 +571,23 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-// Global variables - will be defined in shortcode
+// Global variables are defined in shortcode
 
 // Render services page
 function renderServicesPage(services, page) {
-    currentPage = page;
+    if (typeof currentPage !== 'undefined') {
+        currentPage = page;
+    }
     const container = document.getElementById('services-container');
     let html = '';
 
-    if (services.length === 0) {
+    if (!services || services.length === 0) {
         html = '<div style="text-align: center; padding: 40px; color: #6b7280;">هیچ سرویسی یافت نشد</div>';
     } else {
         services.forEach(service => {
             const serviceName = service.service_full_name || service.name || service.id || '';
             const serviceIcon = service.service_icon || '';
-            const logoUrl = serviceIcon ? (basePath + serviceIcon) : '';
+            const logoUrl = serviceIcon && typeof basePath !== 'undefined' ? (basePath + serviceIcon) : '';
 
             html += `
           <div class="list-item" onclick="viewService('${service.service_short_name}')">
@@ -533,8 +613,17 @@ function renderServicesPage(services, page) {
 
 // Generate pagination HTML
 function generatePaginationHTML(page) {
+    if (typeof allServices === 'undefined' || typeof perPage === 'undefined') {
+        return;
+    }
     const totalPages = Math.ceil(allServices.length / perPage);
     const pageNumbers = document.getElementById('page-numbers');
+    
+    // Check if pagination elements exist (they may not exist on user-purchases page)
+    if (!pageNumbers) {
+        return;
+    }
+    
     let html = '';
 
     // Show only 3 page numbers maximum
@@ -562,21 +651,31 @@ function generatePaginationHTML(page) {
     }
     pageNumbers.innerHTML = html;
 
-    // Update prev/next buttons
-    document.getElementById('prev-page').disabled = page <= 1;
-    document.getElementById('next-page').disabled = page >= totalPages;
+    // Update prev/next buttons (check if they exist)
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    if (prevBtn) prevBtn.disabled = page <= 1;
+    if (nextBtn) nextBtn.disabled = page >= totalPages;
 }
 
 // Update pagination info
 function updatePaginationInfo(page) {
+    if (typeof allServices === 'undefined' || typeof perPage === 'undefined') {
+        return;
+    }
     const start = (page - 1) * perPage + 1;
     const end = Math.min(page * perPage, allServices.length);
     const info = document.getElementById('pagination-info');
-    info.innerHTML = `نمایش ${start} تا ${end}از ${allServices.length} سرویس`;
+    if (info) {
+        info.innerHTML = `نمایش ${start} تا ${end}از ${allServices.length} سرویس`;
+    }
 }
 
 // Change page
 function changePage(page) {
+    if (typeof allServices === 'undefined' || typeof perPage === 'undefined') {
+        return;
+    }
     const totalPages = Math.ceil(allServices.length / perPage);
     if (page < 1 || page > totalPages) return;
 
@@ -592,7 +691,9 @@ function changePage(page) {
 
 // View service countries
 function viewService(serviceShortName) {
-    currentService = serviceShortName;
+    if (typeof currentService !== 'undefined') {
+        currentService = serviceShortName;
+    }
     
     // Add active class to clicked item
     const items = document.querySelectorAll('.list-item');
@@ -601,7 +702,10 @@ function viewService(serviceShortName) {
         event.currentTarget.classList.add('active');
     }
 
-    // Show loading
+    // Show loading overlay
+    showLoading('در حال بارگذاری کشورها...');
+
+    // Show loading in countries table as well
     document.getElementById('countries-table').innerHTML = `
       <div class="row">
         <div class="col" style="grid-column: 1 / -1; text-align: center; color: #FC5A44; padding: 40px 20px;">
@@ -633,6 +737,7 @@ function viewService(serviceShortName) {
           </div>
         `;
             }
+            hideLoading();
         })
         .catch(error => {
             document.getElementById('countries-table').innerHTML = `
@@ -643,6 +748,7 @@ function viewService(serviceShortName) {
           </div>
         </div>
       `;
+            hideLoading();
         });
 }
 
@@ -718,9 +824,11 @@ function attachSearchListeners() {
     
     if (searchInput) {
         searchInput.addEventListener('input', function() {
-            searchQuery = this.value.trim().toLowerCase();
-            console.log('Search query:', searchQuery);
-            performSearch();
+            if (typeof searchQuery !== 'undefined') {
+                searchQuery = this.value.trim().toLowerCase();
+                console.log('Search query:', searchQuery);
+                performSearch();
+            }
         });
     }
 
@@ -748,7 +856,7 @@ function attachSearchListeners() {
     }
 }
 
-// Clear search function - will be defined in shortcode
+// Clear search function is defined in shortcode
 
 // Also attach listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -756,6 +864,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function performSearch() {
+    if (typeof searchQuery === 'undefined' || typeof allServices === 'undefined') {
+        return;
+    }
+    
     const searchResultsInfo = document.getElementById('search-results-info');
     const searchResultsText = document.getElementById('search-results-text');
     const clearSearchBtn = document.getElementById('clear-search');
@@ -777,7 +889,9 @@ function performSearch() {
     }
     
     if (!searchQuery && allServices) {
-        renderServicesPage(allServices.slice((currentPage - 1) * perPage, currentPage * perPage), currentPage);
+        const currentPageValue = typeof currentPage !== 'undefined' ? currentPage : 1;
+        const perPageValue = typeof perPage !== 'undefined' ? perPage : 20;
+        renderServicesPage(allServices.slice((currentPageValue - 1) * perPageValue, currentPageValue * perPageValue), currentPageValue);
         if (searchResultsInfo) {
             searchResultsInfo.classList.remove('show');
         }
@@ -820,7 +934,7 @@ function renderSearchResults(filteredServices) {
         filteredServices.forEach(service => {
             const serviceName = service.service_full_name || service.name || service.id || '';
             const serviceIcon = service.service_icon || '';
-            const logoUrl = serviceIcon ? (basePath + serviceIcon) : '';
+            const logoUrl = serviceIcon && typeof basePath !== 'undefined' ? (basePath + serviceIcon) : '';
 
             html += `
           <div class="list-item" onclick="viewService('${service.service_short_name}')">
@@ -883,7 +997,10 @@ function confirmPurchase() {
     modal.style.setProperty('display', 'none', 'important');
     document.body.style.overflow = 'auto';
 
-    // Show loading
+    // Show loading overlay
+    showLoading('در حال پردازش خرید...');
+
+    // Show loading on button too
     const button = event.target;
     const originalText = button.textContent;
     button.textContent = 'در حال پردازش...';
@@ -924,6 +1041,7 @@ function confirmPurchase() {
             // Restore button
             button.textContent = originalText;
             button.disabled = false;
+            hideLoading();
         });
 }
 

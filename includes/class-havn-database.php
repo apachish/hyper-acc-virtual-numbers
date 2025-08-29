@@ -175,6 +175,7 @@ class HAVN_Database {
         
         $table_name = $wpdb->prefix . 'havn_purchases';
         $table_service = $wpdb->prefix . 'havn_services';
+        $table_countries = $wpdb->prefix . 'havn_countries';
 
         $where_clause = "WHERE p.user_id = %d";
         $params = array($user_id);
@@ -182,14 +183,21 @@ class HAVN_Database {
         if ($status) {
             $where_clause .= " AND p.status = %s";
             $params[] = $status;
+        } else {
+            // Default: only show active (completed) and pending purchases, exclude canceled
+         $where_clause .= " AND p.status IN ('completed', 'pending') AND p.status_number NOT IN ('REFUNDED','CANCELED')";
         }
         
-        $query = "SELECT p.*, s.service_full_name, s.service_icon 
+        $query = "SELECT p.*, 
+                         s.service_full_name, 
+                         s.service_icon,
+                         c.country_name,
+                         c.country_flag
             FROM $table_name p 
-            LEFT JOIN {$table_service} s ON p.service_id = s.service_short_name
+            LEFT JOIN $table_service s ON p.service_id = s.service_short_name
+            LEFT JOIN $table_countries c ON p.service_id = c.service_short_name AND p.country_code = c.country_iso_code
             $where_clause 
             ORDER BY p.created_at DESC";
-        
         return $wpdb->get_results($wpdb->prepare($query, $params));
     }
     
@@ -449,7 +457,7 @@ class HAVN_Database {
         $table_name = $wpdb->prefix . 'havn_purchases';
         
         return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_name WHERE number_id = %s AND user_id = %d AND status = 'completed'",
+            "SELECT * FROM $table_name WHERE number_id = %s AND user_id = %d AND status IN ('completed', 'pending')",
             $number_id,
             $user_id
         ));

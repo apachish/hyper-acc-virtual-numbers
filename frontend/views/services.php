@@ -95,6 +95,58 @@ $all_services_json = json_encode($services_list);
         <div class="services-container" id="services-container">
           <!-- Services will be loaded here -->
         </div>
+        
+        <!-- Loading Overlay -->
+        <div class="havn-loading-overlay" id="havn-loading-overlay" style="display: none;">
+          <div class="havn-loading-spinner">
+            <div class="spinner-border" role="status">
+              <span class="sr-only">در حال بارگذاری...</span>
+            </div>
+            <p class="loading-text">در حال دریافت اطلاعات سرویس‌ها...</p>
+          </div>
+        </div>
+        
+        <!-- Emergency hide loading script -->
+        <script>
+        (function() {
+            function forceHideLoading() {
+                const loadingOverlay = document.getElementById('havn-loading-overlay');
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none !important';
+                    loadingOverlay.style.visibility = 'hidden !important';
+                    loadingOverlay.style.opacity = '0 !important';
+                    loadingOverlay.style.zIndex = '-1 !important';
+                }
+                
+                // Also hide any loading with class
+                const loadingElements = document.querySelectorAll('.havn-loading-overlay');
+                loadingElements.forEach(element => {
+                    element.style.display = 'none !important';
+                    element.style.visibility = 'hidden !important';
+                    element.style.opacity = '0 !important';
+                    element.style.zIndex = '-1 !important';
+                });
+            }
+            
+            // Hide immediately
+            forceHideLoading();
+            
+            // Hide on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', forceHideLoading);
+            } else {
+                forceHideLoading();
+            }
+            
+            // Hide on window load
+            window.addEventListener('load', forceHideLoading);
+            
+            // Emergency timer
+            setTimeout(forceHideLoading, 100);
+            setTimeout(forceHideLoading, 500);
+            setTimeout(forceHideLoading, 1000);
+        })();
+        </script>
 
         <!-- Pagination Footer -->
         <div class="rent-footer">

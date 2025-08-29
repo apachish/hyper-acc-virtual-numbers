@@ -88,7 +88,7 @@ class HAVN_API {
 	 * Get services list from VirtuNum API
 	 */
 	public function get_services() {
-        $cache_key = 'hyper3_services_list';
+        $cache_key = 'hyper_services_list';
         $url = '/services';
         $result = $this->get_curl($url, $cache_key);
         
@@ -176,7 +176,9 @@ class HAVN_API {
         $cache_key = false;
         $url = "/numbers/".$number_id."/codes";
         $result = $this->get_curl($url, $cache_key);
-        
+        error_log(print_r($result, true));
+
+
         // Save codes to database if received
         if (!empty($result) && isset($result['code'])) {
             $this->save_codes_to_database($number_id, $result);
@@ -438,6 +440,7 @@ class HAVN_API {
             $wpdb->update(
                 $wpdb->prefix . 'havn_purchases',
                 array(
+                    'status' => 'CANCELED',
                     'status_number' => 'CANCELED',
                     'updated_at' => current_time('mysql')
                 ),
@@ -695,6 +698,7 @@ class HAVN_API {
 			$table_name,
 			array(
 				'status' => $status,
+				'status_number' => $status,
 				'admin_notes' => $admin_notes,
 				'updated_at' => current_time('mysql')
 			),
@@ -895,9 +899,9 @@ class HAVN_API {
 	 */
 	public function clear_service_cache($service_id = null) {
 		if ($service_id) {
-			delete_transient('havn_service_countries_' . $service_id);
+			delete_transient('hyper_service_countries_list_' . $service_id);
 		} else {
-			delete_transient('havn_services_list');
+			delete_transient('hyper_services_list');
 		}
 	}
 } 

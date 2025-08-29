@@ -119,28 +119,8 @@ class HAVN_Frontend {
         
         $localized_js = 'var havn_ajax = ' . json_encode($ajax_data) . ';' . PHP_EOL . $js_content;
         
-        // Add global variables and clearSearch function for services page
+        // Add clearSearch function for services page
         $clear_search_js = '
-        // Prevent duplicate variable declarations
-        if (typeof allServices === "undefined") {
-            var allServices = [];
-        }
-        if (typeof currentPage === "undefined") {
-            var currentPage = 1;
-        }
-        if (typeof perPage === "undefined") {
-            var perPage = 20;
-        }
-        if (typeof basePath === "undefined") {
-            var basePath = "";
-        }
-        if (typeof currentService === "undefined") {
-            var currentService = null;
-        }
-        if (typeof searchQuery === "undefined") {
-            var searchQuery = "";
-        }
-        
         function clearSearch() {
             const searchInput = document.getElementById("havn-services-search");
             if (searchInput) {
@@ -213,8 +193,28 @@ class HAVN_Frontend {
         
         $localized_js = 'var havn_ajax = ' . json_encode($ajax_data) . ';' . PHP_EOL . $js_content;
         
-        // Add clearSearch function and show/hide logic directly
+        // Add global variables and clearSearch function for user-purchases page
         $clear_search_js = '
+        // Prevent duplicate variable declarations
+        if (typeof allServices === "undefined") {
+            var allServices = [];
+        }
+        if (typeof currentPage === "undefined") {
+            var currentPage = 1;
+        }
+        if (typeof perPage === "undefined") {
+            var perPage = 20;
+        }
+        if (typeof basePath === "undefined") {
+            var basePath = "";
+        }
+        if (typeof currentService === "undefined") {
+            var currentService = null;
+        }
+        if (typeof searchQuery === "undefined") {
+            var searchQuery = "";
+        }
+        
         function clearSearch() {
             const searchInput = document.getElementById("havn-services-search");
             if (searchInput) {
@@ -226,13 +226,6 @@ class HAVN_Frontend {
             }
             if (typeof performSearch === "function") {
                 performSearch();
-            }
-        }
-        
-        // Override performSearch to show/hide clear button
-        function originalPerformSearch() {
-            if (typeof performSearch === "function") {
-                return performSearch.apply(this, arguments);
             }
         }
         
@@ -501,6 +494,10 @@ class HAVN_Frontend {
         
         if (!$purchase) {
             wp_send_json_error('شماره یافت نشد یا متعلق به شما نیست');
+        }
+
+        if ($purchase->status =="completed") {
+            wp_send_json_error('شماره‌ای که کد دریافت کرده قابل لغو نیست');
         }
         
         // Check if number can be canceled (no codes received)

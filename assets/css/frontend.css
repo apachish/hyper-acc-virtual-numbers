@@ -1908,4 +1908,73 @@
 .canceled-message i {
     color: #dc3545;
     font-size: 16px;
+}
+
+/* Loading Overlay Styles */
+.havn-loading-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    display: none !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 9999 !important;
+    backdrop-filter: blur(2px) !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+.havn-loading-overlay.show {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.havn-loading-spinner {
+    background: white !important;
+    padding: 30px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+    text-align: center !important;
+    min-width: 250px !important;
+}
+
+.spinner-border {
+    display: inline-block !important;
+    width: 3rem !important;
+    height: 3rem !important;
+    vertical-align: text-bottom !important;
+    border: 0.25em solid currentColor !important;
+    border-right-color: transparent !important;
+    border-radius: 50% !important;
+    animation: spinner-border 0.75s linear infinite !important;
+    color: #FC5A44 !important;
+}
+
+@keyframes spinner-border {
+    to {
+        transform: rotate(360deg) !important;
+    }
+}
+
+.loading-text {
+    margin: 15px 0 0 0 !important;
+    color: #333 !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+}
+
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 } 
