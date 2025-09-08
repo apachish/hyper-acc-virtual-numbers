@@ -81,6 +81,8 @@ $all_services_json = json_encode($services_list);
     </div>
       <input type="hidden" value="<?php echo $base_path; ?>" id="base_path_js">
       <input type="hidden" value="<?php echo wp_create_nonce('havn_get_codes'); ?>" id="have_nonce">
+      <input type="hidden" value="<?php echo wp_create_nonce('havn_cancel_number'); ?>" id="cancel_nonce">
+
       <textarea style="display: none"  id="all_services_json"><?php echo $all_services_json; ?></textarea>
 
       <input type="hidden" value="<?php echo get_option('havn_usd_rate', 50000); ?>" id="havn_usd_rate">
@@ -278,6 +280,7 @@ $all_services_json = json_encode($services_list);
 </div>
 
 <script>
+
 // Initialize global variables
 window.allServices = <?php echo $all_services_json; ?>;
 
@@ -324,6 +327,35 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+
+// Intercept fetch responses for country loading to catch Unauthorized
+const originalLoadServiceCountries = (typeof loadServiceCountries !== 'undefined') ? loadServiceCountries : null;
+if (originalLoadServiceCountries) {
+    window.loadServiceCountries = function(serviceId) {
+        const formData = new FormData();
+        formData.append('action', 'havn_get_service_countries');
+        formData.append('nonce', havn_ajax.nonce);
+        formData.append('service_id', serviceId);
+
+        const loadingElement = document.querySelector(`[data-service="${serviceId}"] .loading-countries`);
+        fetch(havn_ajax.ajax_url, { method: 'POST', body: formData })
+            .then(resp => {
+                return resp.json().then(json => ({ resp, json }));
+            })
+            .then(({ resp, json }) => {
+                if (havnHandleUnauthorized(resp, json)) { return; }
+                if (json && json.success) {
+                    // Re-run original code path by mimicking previous behavior
+                    originalLoadServiceCountries(serviceId);
+                } else if (loadingElement) {
+                    loadingElement.innerHTML = '<span class="no-countries">خطا در بارگذاری</span>';
+                }
+            })
+            .catch(() => {
+                if (loadingElement) loadingElement.innerHTML = '<span class="no-countries">خطا در بارگذاری</span>';
+            });
+    }
+}
 
 
 </script>

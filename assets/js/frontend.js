@@ -150,7 +150,7 @@ function updateWalletBalance() {
     const formData = new FormData();
     formData.append('action', 'havn_get_user_balance');
     formData.append('nonce', havn_ajax.nonce);
-    
+
     fetch(havn_ajax.ajax_url, {
         method: 'POST',
         body: formData
@@ -1457,5 +1457,74 @@ console.log(numberId)
             // Restore button
             button.disabled = false;
             button.innerHTML = originalText;
+        });
+}
+function cancelNumber(numberId, button) {
+    if (!confirm('آیا مطمئن هستید که می‌خواهید این شماره را لغو کنید؟')) {
+        return;
+    }
+
+    // Show loading
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال لغو...';
+
+    const formData = new FormData();
+    formData.append('action', 'havn_cancel_number');
+    formData.append('number_id', numberId);
+    formData.append('nonce', document.getElementById('cancel_nonce').value);
+    console.log(formData)
+    fetch(havn_ajax.ajax_url, {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the status in the UI
+                const row = button.closest('.list-item');
+                const statusElement = row.querySelector('.service-status:last-child');
+                if (statusElement) {
+                    statusElement.innerHTML = `<i class="fas fa-info-circle"></i> وضعیت: <span class="status-badge status-canceled">CANCELED</span>`;
+                }
+
+                // Replace button with canceled message
+                const actionsDiv = button.closest('.service-actions');
+                if (actionsDiv) {
+                    actionsDiv.innerHTML = `
+                    <div class="canceled-message">
+                        <i class="fas fa-times-circle"></i>
+                        <span>شماره لغو شد</span>
+                    </div>
+                `;
+                }
+
+                // Show success message
+                if (data.data && data.data.warning) {
+                    alert('شماره با موفقیت لغو شد\n\nهشدار: ' + data.data.warning);
+                } else {
+                    alert('شماره با موفقیت لغو شد');
+                }
+
+                // Reload page to update statistics
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                // Restore button
+                button.disabled = false;
+                button.innerHTML = originalText;
+
+                // Show error message
+                alert('خطا در لغو شماره: ' + (data.data || 'خطای نامشخص'));
+            }
+        })
+        .catch(error => {
+            // Restore button
+            button.disabled = false;
+            button.innerHTML = originalText;
+
+            // Show error message
+            alert('خطا در لغو شماره');
         });
 }

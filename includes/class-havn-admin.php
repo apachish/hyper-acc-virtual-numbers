@@ -315,7 +315,6 @@ class HAVN_Admin {
      */
     public function ajax_cancel_number() {
         check_ajax_referer('havn_cancel_number', 'nonce');
-        
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
         }
