@@ -199,8 +199,8 @@ class HAVN_API {
         $codes_json = json_encode($codes_data);
         
         // Get status from API response and map it to our status
-        $status_number = isset($codes_data['state']) ? $codes_data['state'] : 'PENDING';
-        $status = $this->map_api_status_to_local_status($status_number);
+        $status_number = isset($codes_data['state']) ? strtolower($codes_data['state']) : 'pending';
+        $status = strtolower($this->map_api_status_to_local_status($status_number));
 
         // Get purchase details for refund if needed
         $purchase = $wpdb->get_row($wpdb->prepare(
@@ -223,9 +223,15 @@ class HAVN_API {
             array('%s', '%s', '%s'),
             array('%s')
         );
-        
-        // Handle refund if status is CANCELED or REFUNDED
-        if (($status_number === 'CANCELED' || $status_number === 'REFUNDED') && $purchase) {
+        $purchase->code = $codes_json;
+        $purchase->status_number = $status_number;
+        $purchase->status = $status;
+        $purchase->updated_at =  current_time('mysql');
+
+        error_log(print_r(["cancel number"], true));
+        error_log(print_r([$status_number,$purchase], true));
+        // Handle refund if status is canceled or refunded
+        if (($status_number === 'canceled' || $status_number === 'refunded') && $purchase) {
             $this->process_refund($purchase);
         }
     }
@@ -234,17 +240,18 @@ class HAVN_API {
      * Map API status to local status
      */
     private function map_api_status_to_local_status($api_status) {
-        switch (strtoupper($api_status)) {
-            case 'COMPLETED':
-                return 'COMPLETED';
-            case 'CANCELED':
-            case 'CANCELLED':
-                return 'CANCELED';
-            case 'REFUNDED':
-                return 'CANCELED'; // Map REFUNDED to CANCELED for consistency
-            case 'PENDING':
+        switch (strtolower($api_status)) {
+            case 'completed':
+            case 'successful':
+                return 'completed';
+            case 'canceled':
+            case 'cancelled':
+                return 'canceled';
+            case 'refunded':
+                return 'canceled'; // Map refunded to canceled for consistency
+            case 'pending':
             default:
-                return 'PENDING';
+                return 'pending';
         }
     }
     
@@ -254,10 +261,8 @@ class HAVN_API {
     private function process_refund($purchase) {
         global $wpdb;
         
-        // Only refund if status was PENDING (not already processed)
-        if ($purchase->status_number !== 'PENDING') {
-            return;
-        }
+        // Only refund if status was pending (not already processed)
+  
         
         $user_id = $purchase->user_id;
         $cost = floatval($purchase->cost);
@@ -297,7 +302,7 @@ class HAVN_API {
         // Get all pending numbers
         $pending_numbers = $wpdb->get_results(
             "SELECT number_id FROM {$wpdb->prefix}havn_purchases 
-             WHERE status_number = 'PENDING' AND number_id IS NOT NULL"
+             WHERE status_number = 'pending' AND number_id IS NOT NULL"
         );
         
         $updated_count = 0;
@@ -312,7 +317,7 @@ class HAVN_API {
                     $local_status = $this->map_api_status_to_local_status($api_status);
                     
                     // Update status if changed
-                    if ($local_status !== 'PENDING') {
+                    if ($local_status !== 'pending') {
                         $wpdb->update(
                             $wpdb->prefix . 'havn_purchases',
                             array(
@@ -327,7 +332,7 @@ class HAVN_API {
                         $updated_count++;
                         
                         // Process refund for canceled/refunded numbers
-                        if ($local_status === 'CANCELED' || $api_status === 'REFUNDED') {
+                        if ($local_status === 'canceled' || $api_status === 'refunded') {
                             $purchase = $wpdb->get_row($wpdb->prepare(
                                 "SELECT * FROM {$wpdb->prefix}havn_purchases WHERE number_id = %s",
                                 $number->number_id
@@ -396,8 +401,8 @@ class HAVN_API {
                 array('%s')
             );
             
-            // Process refund if status changed to CANCELED/REFUNDED
-            if (($local_status === 'CANCELED' || $api_status === 'REFUNDED') && $purchase->status_number === 'PENDING') {
+            // Process refund if status changed to canceled/refunded
+            if (($local_status === 'canceled' || $api_status === 'refunded') && $purchase->status_number === 'pending') {
                 $this->process_refund($purchase);
             }
         }
@@ -440,8 +445,8 @@ class HAVN_API {
             $wpdb->update(
                 $wpdb->prefix . 'havn_purchases',
                 array(
-                    'status' => 'CANCELED',
-                    'status_number' => 'CANCELED',
+                    'status' => 'canceled',
+                    'status_number' => 'canceled',
                     'updated_at' => current_time('mysql')
                 ),
                 array('number_id' => $number_id),
@@ -449,8 +454,8 @@ class HAVN_API {
                 array('%s')
             );
             
-            // Process refund if purchase exists and was PENDING
-            if ($purchase && $purchase->status_number === 'PENDING') {
+            // Process refund if purchase exists and was pending
+            if ($purchase && $purchase->status_number === 'pending') {
                 $this->process_refund($purchase);
             }
             
@@ -620,7 +625,55 @@ class HAVN_API {
 		// If TeraWallet is not available, treat balance as zero
 		return 0.0;
 	}
-	
+
+    public function get_user_purchases($user_id) {
+        $all_purchases = HAVN_Database::get_user_purchases($user_id, null);
+
+// Filter to show only completed and pending purchases
+        $purchases = array_filter($all_purchases, function($purchase) {
+            return in_array($purchase->status, ['completed', 'pending']);
+        });
+
+        $has_purchases = !empty($purchases);
+
+// Initialize variables
+        $services_data = array();
+        $services_list = array();
+        $all_services_json = '[]';
+
+// Process purchases if user has any
+        if ($has_purchases) {
+            // Get base path for service icons
+            $base_path = get_option('havn_services_base_path', '');
+
+            // Group purchases by service
+            foreach ($purchases as $purchase) {
+                $service_key = $purchase->service_id;
+
+                if (!isset($services_data[$service_key])) {
+                    // Build complete service icon URL
+                    $service_icon_url = '';
+                    if (!empty($purchase->service_icon)) {
+                        $service_icon_url = $base_path . $purchase->service_icon;
+                    }
+
+                    $services_data[$service_key] = array(
+                        'service_id' => $purchase->service_id,
+                        'service_name' => $purchase->service_full_name,
+                        'service_icon' => $service_icon_url,
+                        'purchases' => array()
+                    );
+                }
+
+                $services_data[$service_key]['purchases'][] = $purchase;
+            }
+
+            // Convert to indexed array for JavaScript
+            $services_list = array_values($services_data);
+        }
+        return $services_list;
+	}
+
 	/**
 	 * Deduct balance from user account using TeraWallet
 	 */
@@ -675,7 +728,7 @@ class HAVN_API {
 				'number' => '',
 				'cost' => 0,
 				'status' => 'pending',
-				'status_number' => 'PENDING',
+				'status_number' => 'pending',
 				'api_response' => '',
 				'created_at' => current_time('mysql'),
 				'updated_at' => current_time('mysql')

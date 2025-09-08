@@ -28,7 +28,6 @@ $services = array_slice($services_list, $offset, $per_page);
 
 // Pass all services to JavaScript for client-side pagination
 $all_services_json = json_encode($services_list);
-
 ?>
 
 <div class="havn-virtual-numbers-container">
@@ -80,82 +79,12 @@ $all_services_json = json_encode($services_list);
       </div>
     </div>
       <input type="hidden" value="<?php echo $base_path; ?>" id="base_path_js">
-      <input type="hidden" value="<?php echo wp_create_nonce('havn_get_codes'); ?>" id="have_nonce">
       <textarea style="display: none"  id="all_services_json"><?php echo $all_services_json; ?></textarea>
-
       <input type="hidden" value="<?php echo get_option('havn_usd_rate', 50000); ?>" id="havn_usd_rate">
       <input type="hidden" value="<?php echo get_option('havn_profit_margin', 10); ?>" id="havn_profit_margin">
     <!-- Search Results Info -->
 
-      <!-- Info Modal -->
-      <div class="info-modal" id="info-modal" style="display: none;">
-          <div class="info-modal-overlay" onclick="closeModal()"></div>
-          <div class="info-modal-content">
-              <div class="info-modal-header">
-                  <h3><?php echo esc_html(get_option('havn_page_title', 'شماره‌های مجازی')); ?></h3>
-                  <button class="close-modal" onclick="closeModal()">×</button>
-              </div>
-              <div class="info-modal-body">
-                  <?php echo get_option('havn_info_text', 'اطلاعات شماره‌های مجازی در اینجا قرار می‌گیرد.'); ?>
-              </div>
-          </div>
-      </div>
 
-      <!-- Purchase Confirmation Modal -->
-      <div class="purchase-modal" id="purchase-confirmation-modal" style="display: none;">
-          <div class="purchase-modal-overlay" onclick="cancelPurchase()"></div>
-          <div class="purchase-modal-content">
-              <div class="purchase-modal-header">
-                  <h3>تأیید خرید</h3>
-                  <button class="close-modal" onclick="cancelPurchase()">×</button>
-              </div>
-              <div class="purchase-modal-body">
-                  <div class="purchase-icon">🛒</div>
-                  <p>آیا از خرید این شماره اطمینان دارید؟</p>
-                  <p class="purchase-note">مبلغ از کیف پول شما کسر خواهد شد.</p>
-              </div>
-              <div class="purchase-modal-footer">
-                  <button class="btn btn-secondary" onclick="cancelPurchase()">انصراف</button>
-                  <button class="btn btn-primary" id="confirm-purchase-btn" onclick="confirmPurchase()">تأیید خرید</button>
-              </div>
-          </div>
-      </div>
-
-      <!-- Success Modal -->
-      <div class="success-modal" id="success-modal" style="display: none;">
-          <div class="success-modal-overlay" onclick="closeSuccessModal()"></div>
-          <div class="success-modal-content">
-              <div class="success-modal-header">
-                  <h3>موفقیت</h3>
-                  <button class="close-modal" onclick="closeSuccessModal()">×</button>
-              </div>
-              <div class="success-modal-body">
-                  <div class="success-icon">✅</div>
-                  <p id="success-message"></p>
-              </div>
-              <div class="success-modal-footer">
-                  <button class="btn btn-primary" onclick="closeSuccessModal()">باشه</button>
-              </div>
-          </div>
-      </div>
-
-      <!-- Error Modal -->
-      <div class="error-modal" id="error-modal" style="display: none;">
-          <div class="error-modal-overlay" onclick="closeErrorModal()"></div>
-          <div class="error-modal-content">
-              <div class="error-modal-header">
-                  <h3>خطا</h3>
-                  <button class="close-modal" onclick="closeErrorModal()">×</button>
-              </div>
-              <div class="error-modal-body">
-                  <div class="error-icon">❌</div>
-                  <p id="error-message"></p>
-              </div>
-              <div class="error-modal-footer">
-                  <button class="btn btn-primary" onclick="closeErrorModal()">باشه</button>
-              </div>
-          </div>
-      </div>
     <!-- Main Content -->
     <div class="rent-body" id="main-content">
       <!-- Services List -->
@@ -233,6 +162,77 @@ $all_services_json = json_encode($services_list);
           نمایش 1 تا 20 از <?php echo $total_services; ?> سرویس
         </div>
       </div>
+
+      <!-- Info Modal -->
+      <div class="info-modal" id="info-modal" style="display: none;">
+        <div class="info-modal-overlay" onclick="closeModal()"></div>
+        <div class="info-modal-content">
+          <div class="info-modal-header">
+            <h3><?php echo esc_html(get_option('havn_page_title', 'شماره‌های مجازی')); ?></h3>
+            <button class="close-modal" onclick="closeModal()">×</button>
+          </div>
+          <div class="info-modal-body">
+            <?php echo get_option('havn_info_text', 'اطلاعات شماره‌های مجازی در اینجا قرار می‌گیرد.'); ?>
+          </div>
+        </div>
+      </div>
+
+      <!-- Purchase Confirmation Modal -->
+      <div class="purchase-modal" id="purchase-confirmation-modal" style="display: none;">
+        <div class="purchase-modal-overlay" onclick="cancelPurchase()"></div>
+        <div class="purchase-modal-content">
+          <div class="purchase-modal-header">
+            <h3>تأیید خرید</h3>
+            <button class="close-modal" onclick="cancelPurchase()">×</button>
+          </div>
+          <div class="purchase-modal-body">
+            <div class="purchase-icon">🛒</div>
+            <p>آیا از خرید این شماره اطمینان دارید؟</p>
+            <p class="purchase-note">مبلغ از کیف پول شما کسر خواهد شد.</p>
+          </div>
+          <div class="purchase-modal-footer">
+            <button class="btn btn-secondary" onclick="cancelPurchase()">انصراف</button>
+            <button class="btn btn-primary" id="confirm-purchase-btn" onclick="confirmPurchase()">تأیید خرید</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success Modal -->
+      <div class="success-modal" id="success-modal" style="display: none;">
+        <div class="success-modal-overlay" onclick="closeSuccessModal()"></div>
+        <div class="success-modal-content">
+          <div class="success-modal-header">
+            <h3>موفقیت</h3>
+            <button class="close-modal" onclick="closeSuccessModal()">×</button>
+          </div>
+          <div class="success-modal-body">
+            <div class="success-icon">✅</div>
+            <p id="success-message"></p>
+          </div>
+          <div class="success-modal-footer">
+            <button class="btn btn-primary" onclick="closeSuccessModal()">باشه</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Modal -->
+      <div class="error-modal" id="error-modal" style="display: none;">
+        <div class="error-modal-overlay" onclick="closeErrorModal()"></div>
+        <div class="error-modal-content">
+          <div class="error-modal-header">
+            <h3>خطا</h3>
+            <button class="close-modal" onclick="closeErrorModal()">×</button>
+          </div>
+          <div class="error-modal-body">
+            <div class="error-icon">❌</div>
+            <p id="error-message"></p>
+          </div>
+          <div class="error-modal-footer">
+            <button class="btn btn-primary" onclick="closeErrorModal()">باشه</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Countries Table -->
       <div class="rent-table-box">
         <div class="rent-filters">
@@ -244,32 +244,9 @@ $all_services_json = json_encode($services_list);
         <div class="rent-table" id="countries-table">
           <div class="row">
             <div class="col" style="grid-column: 1 / -1; text-align: center; color: #FC5A44; padding: 40px 20px;">
-              <div style="font-size: 16px; margin-bottom: 8px;">👉</div>
+              <div style="font-size: 16px; margin-bottom: 8px;">👆</div>
               برای مشاهده کشورهای موجود، روی یک سرویس کلیک کنید
             </div>
-          </div>
-        </div>
-      </div>
-
-        <div class="rent-table-box">
-            <div class="rent-user">
-                <span>مشاهده شماره‌های مجازی خریداری شده</span>
-
-            </div>
-        <div class="countries-container" id="countries-container">
-          <div class="row">
-            <div class="col" style="grid-column: 1 / -1; text-align: center; color: #FC5A44; padding: 40px 20px;">
-                <?php
-                    if (is_user_logged_in()) {
-                ?>
-              <div style="font-size: 16px; margin-bottom: 8px;">🎯</div>
-                شما هنوز خریدی نداشته‌اید
-            </div>
-              <?php } else{ ?>
-              <div style="font-size: 16px; margin-bottom: 8px;">🧑‍💻</div>
-              برای مشاهد خرید به حساب کاربری خود وارد شوید
-          </div>
-              <?php }?>
           </div>
         </div>
       </div>
@@ -280,7 +257,6 @@ $all_services_json = json_encode($services_list);
 <script>
 // Initialize global variables
 window.allServices = <?php echo $all_services_json; ?>;
-
 window.currentPage = 1;
 window.perPage = 20;
 window.basePath = '<?php echo $base_path; ?>';

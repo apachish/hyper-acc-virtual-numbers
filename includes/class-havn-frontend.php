@@ -20,6 +20,7 @@ class HAVN_Frontend {
         add_action('wp_ajax_nopriv_havn_get_service_countries', array($this, 'ajax_get_service_countries'));
         add_action('wp_ajax_havn_get_user_stats', array($this, 'ajax_get_user_stats'));
         add_action('wp_ajax_havn_get_user_balance', array($this, 'ajax_get_user_balance'));
+        add_action('wp_ajax_havn_get_user_purchases', array($this, 'ajax_get_user_purchases'));
         add_shortcode('havn_services', array($this, 'services_shortcode'));
         add_shortcode('havn_user_purchases', array($this, 'user_purchases_shortcode'));
         
@@ -397,13 +398,13 @@ class HAVN_Frontend {
      */
     public function ajax_get_number_codes() {
         check_ajax_referer('havn_get_codes', 'nonce');
-        
+        error_log("ajax_get_number_codes");
+
         if (!is_user_logged_in()) {
             wp_send_json_error('لطفاً ابتدا وارد شوید');
         }
         
         $number_id = sanitize_text_field($_POST['number_id']);
-        
         if (empty($number_id)) {
             wp_send_json_error('شناسه شماره الزامی است');
         }
@@ -411,7 +412,8 @@ class HAVN_Frontend {
         // Verify user owns this number
         $user_id = get_current_user_id();
         $purchase = HAVN_Database::get_purchase_by_number_id($number_id, $user_id);
-        
+        error_log(print_r($purchase, true));
+
         if (!$purchase) {
             wp_send_json_error('شماره یافت نشد یا متعلق به شما نیست');
         }
@@ -420,7 +422,7 @@ class HAVN_Frontend {
         $api = new HAVN_API();
         $codes_data = $api->get_number_codes($number_id);
         
-        if (empty($codes_data) || !isset($codes_data['codes'])) {
+        if (empty($codes_data) || !isset($codes_data['code'])) {
             wp_send_json_success(array('codes' => array()));
         }
         
@@ -518,7 +520,7 @@ class HAVN_Frontend {
             $updated = $wpdb->update(
                 $wpdb->prefix . 'havn_purchases',
                 array(
-                    'status_number' => 'CANCELED',
+                    'status_number' => 'canceled',
                     'updated_at' => current_time('mysql')
                 ),
                 array('number_id' => $number_id),
@@ -575,6 +577,20 @@ class HAVN_Frontend {
         $api = new HAVN_API();
         $balance = $api->get_user_balance($user_id);
         
+        wp_send_json_success($balance);
+    }
+
+    public function ajax_get_user_purchases() {
+        check_ajax_referer('havn_frontend_nonce', 'nonce');
+
+        if (!is_user_logged_in()) {
+            wp_send_json_error('لطفاً ابتدا وارد شوید');
+        }
+
+        $user_id = get_current_user_id();
+        $api = new HAVN_API();
+        $balance = $api->get_user_purchases($user_id);
+
         wp_send_json_success($balance);
     }
 } 

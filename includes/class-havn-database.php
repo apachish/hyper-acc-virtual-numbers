@@ -185,7 +185,7 @@ class HAVN_Database {
             $params[] = $status;
         } else {
             // Default: only show active (completed) and pending purchases, exclude canceled
-         $where_clause .= " AND p.status IN ('completed', 'pending') AND p.status_number NOT IN ('REFUNDED','CANCELED')";
+         $where_clause .= " AND p.status IN ('completed', 'pending') AND p.status_number NOT IN ('refunded','canceled')";
         }
         
         $query = "SELECT p.*, 
@@ -210,7 +210,7 @@ class HAVN_Database {
         $table_name = $wpdb->prefix . 'havn_purchases';
         
         $data = array(
-            'status' => $status,
+            'status' => strtolower($status),
             'updated_at' => current_time('mysql')
         );
         

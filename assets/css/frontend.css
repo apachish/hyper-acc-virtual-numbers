@@ -187,7 +187,7 @@
 }
 
 .havn-virtual-numbers-container .status-badge {
-  padding: 4px 8px !important;
+  padding: 1px 1px !important;
   border-radius: 6px !important;
   font-size: 12px !important;
   font-weight: 600 !important;
@@ -199,12 +199,13 @@
   color: #856404 !important;
 }
 
+
 .havn-virtual-numbers-container .status-canceled {
   background: #f8d7da !important;
   color: #721c24 !important;
 }
 
-.havn-virtual-numbers-container .status-completed {
+.havn-virtual-numbers-container .status-successful {
   background: #d4edda !important;
   color: #155724 !important;
 }
@@ -352,9 +353,9 @@
 .havn-virtual-numbers-container .codes-result-box {
   background: #ffffff !important;
   border: 1px solid #e5e7eb !important;
+  height: 30px;
+  width: 100%;
   border-radius: 8px !important;
-  margin-top: 12px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
   overflow: hidden !important;
 }
 
@@ -432,11 +433,21 @@
 
 .havn-virtual-numbers-container .code-text {
   font-family: 'Courier New', monospace !important;
-  font-size: 16px !important;
-  font-weight: 600 !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
   color: #FC5A44 !important;
   background: #ffffff !important;
   padding: 4px 8px !important;
+  border-radius: 4px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.havn-virtual-numbers-container .code-error {
+  font-family: 'Courier New', monospace !important;
+  font-size: 8px !important;
+  font-weight: 200 !important;
+  color: #f11010 !important;
+  background: #ffffff !important;
   border-radius: 4px !important;
   border: 1px solid #e5e7eb !important;
 }
@@ -606,7 +617,6 @@
   padding: 60px 40px !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
   max-width: 500px !important;
-  width: 100% !important;
   border: 2px solid #f0f0f0 !important;
 }
 
@@ -1219,9 +1229,10 @@
 /* Rent Body */
 .havn-virtual-numbers-container .rent-body {
   display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 30px !important;
-  padding: 20px !important;
+  grid-template-columns: 1fr 2fr 1fr !important;
+  gap: 20px !important;
+  padding: 16px !important;
+  align-items: start;
 }
 
 /* Rent List (Services) */
@@ -1293,13 +1304,31 @@
 
 .havn-virtual-numbers-container .list-item .service-name {
   font-weight: 600 !important;
+  margin: 2%;
+  color: #1f2937 !important;
+  font-size: 14px !important;
+}
+.havn-virtual-numbers-container .list-item .service-number {
+  font-weight: 400 !important;
   color: #1f2937 !important;
   font-size: 14px !important;
 }
 
 .havn-virtual-numbers-container .list-item .service-status {
   font-size: 12px !important;
+  margin: 4%;
   color: #6b7280 !important;
+}
+
+.havn-virtual-numbers-container .list-item .service-sms {
+  font-size: 12px !important;
+  margin: 2%;
+  color: #6b7280 !important;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  align-items: start;
+}
+.havn-virtual-numbers-container .list-item .service-sms div {
 }
 
 .havn-virtual-numbers-container .list-item .view-btn {
@@ -1426,6 +1455,33 @@
   border-radius: 12px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
   overflow: hidden !important;
+}
+
+ .rent-user {
+  display: grid !important;
+  grid-template-columns:  auto !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  background: #FFEFEC !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  margin-bottom: 20px !important;
+  color: #FC5A44 !important;
+  font-size: 14px !important;
+  position: relative !important;
+}
+
+ .rent-user span {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  position: relative !important;
+  padding-right: 32px !important;
+
+}
+
+ .rent-user span:first-child::after  {
+   background-image: url('../images/world.svg') !important;
 }
 
 .havn-virtual-numbers-container .rent-filters {

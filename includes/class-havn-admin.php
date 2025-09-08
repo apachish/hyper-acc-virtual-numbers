@@ -346,7 +346,7 @@ class HAVN_Admin {
             $wpdb->update(
                 $table_name,
                 array(
-                    'status_number' => 'CANCELED',
+                    'status_number' => 'canceled',
                     'updated_at' => current_time('mysql')
                 ),
                 array('number_id' => $number_id),
