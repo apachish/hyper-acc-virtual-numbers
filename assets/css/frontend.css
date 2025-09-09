@@ -2038,5 +2038,376 @@
   font-size: 12px !important;
   font-weight: 300 !important;
   color: #FC5A44 !important;
+}
 
+/* ===== MODERN PURCHASE NUMBER CARDS STYLES ===== */
+
+/* Modern Purchase Number Card */
+.havn-purchase-number-card {
+  background: white !important;
+  border-radius: 15px !important;
+  padding: 15px !important;
+  margin-bottom: 15px !important;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.08) !important;
+  border: 1px solid rgba(0,0,0,0.05) !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.havn-purchase-number-card::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 4px !important;
+  height: 100% !important;
+  background: linear-gradient(135deg, #ea8d7c 0%, #f48b75 100%) !important;
+  transition: width 0.3s ease !important;
+}
+
+.havn-purchase-number-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important;
+  border-color: #ea8d7c !important;
+}
+
+.havn-purchase-number-card:hover::before {
+  width: 8px !important;
+}
+
+/* Purchase Card Info Section */
+.havn-purchase-card-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.havn-purchase-card-details {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+/* Service Name with Icon */
+.havn-purchase-service-name {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  color: #1e293b !important;
+}
+
+.havn-purchase-service-name img {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+  object-fit: cover !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+  border: 1px solid #f1f5f9 !important;
+}
+
+/* Info Items */
+.havn-purchase-number,
+.havn-purchase-status,
+.havn-purchase-sms {
+  background: #f8fafc !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+  border: 1px solid #e2e8f0 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.havn-purchase-number:hover,
+.havn-purchase-status:hover,
+.havn-purchase-sms:hover {
+  background: #f1f5f9 !important;
+  transform: translateX(5px) !important;
+}
+
+/* Phone Number with Copy Button */
+.havn-purchase-number {
+  font-size: 13px !important;
+  color: #1e293b !important;
+  justify-content: space-between !important;
+}
+
+.havn-purchase-number i {
+  color: #10b981 !important;
+  font-size: 14px !important;
+}
+
+.havn-purchase-number a {
+  color: #3b82f6 !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  font-family: 'Courier New', monospace !important;
+  flex: 1 !important;
+}
+
+.havn-purchase-number a:hover {
+  text-decoration: underline !important;
+}
+
+/* Copy Button for Phone Number */
+.havn-copy-phone-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3) !important;
+  position: relative !important;
+}
+
+.havn-copy-phone-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+}
+
+.havn-copy-phone-btn:active {
+  transform: translateY(0) !important;
+}
+
+.havn-copy-phone-btn.copied {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+}
+
+.havn-copy-phone-btn.copied::after {
+  content: 'کپی شد!' !important;
+  position: absolute !important;
+  top: -30px !important;
+  right: 50% !important;
+  transform: translateX(50%) !important;
+  background: #1f2937 !important;
+  color: white !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  font-size: 10px !important;
+  white-space: nowrap !important;
+  z-index: 1000 !important;
+}
+
+/* Status Badge */
+.havn-purchase-status {
+  font-size: 12px !important;
+  color: #1e293b !important;
+}
+
+.havn-purchase-status i {
+  color: #f59e0b !important;
+  font-size: 14px !important;
+}
+
+.havn-purchase-status-badge {
+  padding: 4px 8px !important;
+  border-radius: 15px !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+}
+
+.havn-purchase-status-pending {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.havn-purchase-status-active {
+  background: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+.havn-purchase-status-canceled {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.havn-purchase-status-completed {
+  background: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+/* SMS Section */
+.havn-purchase-sms {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+}
+
+.havn-purchase-sms > div:first-child {
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  font-size: 12px !important;
+}
+
+/* Code Display */
+.havn-purchase-codes-box {
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  /*padding: 8px 10px !important;*/
+  font-family: 'Courier New', monospace !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #059669 !important;
+  text-align: center !important;
+  min-height: 35px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
+}
+
+.havn-purchase-codes-box:not(:empty) {
+  background: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #059669 !important;
+}
+
+/* Action Buttons */
+.havn-purchase-actions {
+  display: flex !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  margin-top: 12px !important;
+}
+
+.havn-purchase-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+  text-decoration: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+  min-width: 120px !important;
+  justify-content: center !important;
+}
+
+.havn-purchase-btn::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent) !important;
+  transition: left 0.5s !important;
+}
+
+.havn-purchase-btn:hover::before {
+  left: 100% !important;
+}
+
+.havn-purchase-btn-primary {
+  background: linear-gradient(135deg, #f16a59 0%, #ed8375 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgb(211, 95, 85) !important;
+}
+
+.havn-purchase-btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+.havn-purchase-btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3) !important;
+}
+
+.havn-purchase-btn-danger:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+}
+
+.havn-purchase-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* Responsive Design for Purchase Cards */
+@media (max-width: 768px) {
+  .havn-purchase-number-card {
+    padding: 12px !important;
+  }
+  
+  .havn-purchase-service-name {
+    font-size: 0.9rem !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 6px !important;
+  }
+  
+  .havn-purchase-service-name img {
+    width: 25px !important;
+    height: 25px !important;
+  }
+  
+  .havn-purchase-actions {
+    justify-content: center !important;
+  }
+  
+  .havn-purchase-btn {
+    flex: 1 !important;
+    min-width: 100px !important;
+  }
+  
+  .havn-purchase-number {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+  
+  .havn-copy-phone-btn {
+    align-self: flex-end !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .havn-purchase-number-card {
+    padding: 10px !important;
+  }
+  
+  .havn-purchase-number,
+  .havn-purchase-status,
+  .havn-purchase-sms {
+    padding: 8px !important;
+  }
+  
+  .havn-purchase-btn {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+  }
+  
+  .havn-purchase-codes-box {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+  }
+  
+  .havn-copy-phone-btn {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+  }
 }

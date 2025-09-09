@@ -1140,7 +1140,7 @@ function renderCountriesUser(serviceId= null) {
 
                     window.currentService.forEach(purchase => {
                         const countryElement = document.createElement('div');
-                        countryElement.className = 'list-item country-item';
+                        countryElement.className = 'havn-purchase-number-card';
 
                         // Check if purchase has existing codes
                         let hasExistingCode = false;
@@ -1175,60 +1175,58 @@ function renderCountriesUser(serviceId= null) {
                         countryElement.innerHTML = `
           <div class="service-info">
       
-                <div class="service-details">
-                 <div class="service-info">
-       
-              </div>
-                    <div class="service-name">
-                                  <img src="${purchase.service_icon}" alt="${purchase.service_name}" class="country-flag" onerror="this.style.display='none'">
-                  <div class="service-details">
-                    <div class="service-name">${purchase.service_name}</div>
-                                            <img src="https://flagcdn.com/${purchase.purchase.country_code}.svg" 
-                         alt="${purchase.purchase.country_code}"
-                         class="country-flag"
-                         onerror="this.src='<?php echo HAVN_PLUGIN_URL; ?>assets/images/default-flag.png'">
-                        کشور: ${purchase.purchase.country_code.toUpperCase()}
+                <div class="havn-purchase-card-details">
+                    <div class="havn-purchase-service-name">
+                        <img src="${purchase.service_icon}" alt="${purchase.service_name}" onerror="this.style.display='none'">
+                        <div>${purchase.service_name}</div>
+                        <img src="https://flagcdn.com/${purchase.purchase.country_code}.svg" 
+                             alt="${purchase.purchase.country_code}"
+                             class="country-flag"
+                             onerror="this.src='<?php echo HAVN_PLUGIN_URL; ?>assets/images/default-flag.png'">
+                        <span>کشور: ${purchase.purchase.country_code.toUpperCase()}</span>
                     </div>
-                    <div class="service-number">
+                    <div class="havn-purchase-number">
                         <i class="fas fa-phone"></i>
-                        شماره: <a href="tel://${purchase.purchase.number || 'نامشخص'}">${purchase.purchase.number || 'نامشخص'}</a> 
+                        <span>شماره: <a href="tel://${purchase.purchase.number || 'نامشخص'}">${purchase.purchase.number || 'نامشخص'}</a></span>
+                        <button class="havn-copy-phone-btn" onclick="copyPhoneNumber('${purchase.purchase.number || ''}', this)" title="کپی شماره">
+                            <i class="fas fa-copy"></i>
+                            کپی
+                        </button>
                     </div>
-                    <div class="service-status" id="satats-number-${purchase.purchase.number_id}">
+                    <div class="havn-purchase-status" id="satats-number-${purchase.purchase.number_id}">
                         <i class="fas fa-info-circle"></i>
-                        وضعیت: <span class="status-badge status-${purchase.purchase.status_number?.toLowerCase() || 'pending'}">${purchase.purchase.status_number || 'نامشخص'}</span>
+                        <span>وضعیت: <span class="havn-purchase-status-badge havn-purchase-status-${purchase.purchase.status_number?.toLowerCase() || 'pending'}">${purchase.purchase.status_number || 'نامشخص'}</span></span>
                     </div>           
-                     <div class="service-sms">
+                    <div class="havn-purchase-sms">
                         <div>پیامک:</div>
-                           <div class="codes-result-box code-text" id="codes-result-${purchase.purchase.number_id}" >
-                                ${existingCode}
-                            </div>
+                        <div class="havn-purchase-codes-box" id="codes-result-${purchase.purchase.number_id}">
+                            ${existingCode}
+                        </div>
                         <div id="codes-error-${purchase.purchase.number_id}"></div>
                     </div>
-                     
-           
                 </div>
             </div>
-            <div class="service-actions">
+            <div class="havn-purchase-actions">
                 ${purchase.purchase.status_number === 'CANCELED' ? `
                     <div></div>
                 ` : purchase.purchase.number_id ? `
                     ${shouldShowCancel ? `
-                 <button class="view-btn primary-btn" style="margin-bottom: 10px" onclick="getCodes('${purchase.purchase.number_id}', this)">
+                 <button class="havn-purchase-btn havn-purchase-btn-primary" style="margin-bottom: 10px" onclick="getCodes('${purchase.purchase.number_id}', this)">
                             <i class="fas fa-key"></i>
                             دریافت کد
                         </button>
-                        <button class="view-btn danger-btn" onclick="cancelNumber('${purchase.purchase.number_id}', this)">
+                        <button class="havn-purchase-btn havn-purchase-btn-danger" onclick="cancelNumber('${purchase.purchase.number_id}', this)">
                             <i class="fas fa-times"></i>
                             لغو شماره
                         </button>
 
                     ` : hasExistingCode ? `
-                        <button class="view-btn primary-btn" onclick="getCodes('${purchase.purchase.number_id}', this)">
+                        <button class="havn-purchase-btn havn-purchase-btn-primary" onclick="getCodes('${purchase.purchase.number_id}', this)">
                             <i class="fas fa-key"></i>
                             دریافت کد 
                         </button>
                     ` : `
-                        <button class="view-btn primary-btn" onclick="getCodes('${purchase.purchase.number_id}', this)">
+                        <button class="havn-purchase-btn havn-purchase-btn-primary" onclick="getCodes('${purchase.purchase.number_id}', this)">
                             <i class="fas fa-key"></i>
                             دریافت کد
                         </button>
@@ -1294,13 +1292,13 @@ console.log(numberId)
                     const codesHtml = data.data.code;
                     resultBox.innerHTML = `${codesHtml}`;
                     // Replace the button with the new code display
-                    const actionsDiv = button.closest('.service-actions');
+                    const actionsDiv = button.closest('.havn-purchase-actions');
 
 
                     // Update the status in the UI
-                    const row = button.closest('.list-item');
+                    const row = button.closest('.havn-purchase-number-card');
                     if (statusBox) {
-                        statusBox.innerHTML = `<i class="fas fa-info-circle"></i> وضعیت: <span class="status-badge status-${data.data.state?.toLowerCase() || 'pending'}">${data.data.state || 'PENDING'}</span>`;
+                        statusBox.innerHTML = `<i class="fas fa-info-circle"></i> <span>وضعیت: <span class="havn-purchase-status-badge havn-purchase-status-${data.data.state?.toLowerCase() || 'pending'}">${data.data.state || 'PENDING'}</span></span>`;
                     }
                 } else {
                     if(data.data.state?.toLowerCase() == "refunded"){
@@ -1352,14 +1350,14 @@ function cancelNumber(numberId, button) {
         .then(data => {
             if (data.success) {
                 // Update the status in the UI
-                const row = button.closest('.list-item');
-                const statusElement = row.querySelector('.service-status:last-child');
+                const row = button.closest('.havn-purchase-number-card');
+                const statusElement = row.querySelector('.havn-purchase-status');
                 if (statusElement) {
-                    statusElement.innerHTML = `<i class="fas fa-info-circle"></i> وضعیت: <span class="status-badge status-canceled">CANCELED</span>`;
+                    statusElement.innerHTML = `<i class="fas fa-info-circle"></i> <span>وضعیت: <span class="havn-purchase-status-badge havn-purchase-status-canceled">CANCELED</span></span>`;
                 }
 
                 // Replace button with canceled message
-                const actionsDiv = button.closest('.service-actions');
+                const actionsDiv = button.closest('.havn-purchase-actions');
                 if (actionsDiv) {
                     actionsDiv.innerHTML = `
                     <div class="canceled-message">
