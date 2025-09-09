@@ -629,8 +629,8 @@ class HAVN_API {
 		return 0.0;
 	}
 
-    public function get_user_purchases($user_id) {
-        $all_purchases = HAVN_Database::get_user_purchases($user_id, null);
+    public function get_user_purchases($user_id,$service_id) {
+        $all_purchases = HAVN_Database::get_user_purchases($user_id, null,$service_id);
 
 // Filter to show only completed and pending purchases
         $purchases = array_filter($all_purchases, function($purchase) {
@@ -651,7 +651,8 @@ class HAVN_API {
 
             // Group purchases by service
             foreach ($purchases as $purchase) {
-                $service_key = $purchase->service_id;
+
+                $service_key = $purchase->id;
 
                 if (!isset($services_data[$service_key])) {
                     // Build complete service icon URL
@@ -664,11 +665,11 @@ class HAVN_API {
                         'service_id' => $purchase->service_id,
                         'service_name' => $purchase->service_full_name,
                         'service_icon' => $service_icon_url,
-                        'purchases' => array()
+                        'purchase' => $purchase
                     );
                 }
-
-                $services_data[$service_key]['purchases'][] = $purchase;
+                error_log(print_r([$services_data],true));
+//                $services_data[$service_key]['purchases'][] = $purchase;
             }
 
             // Convert to indexed array for JavaScript

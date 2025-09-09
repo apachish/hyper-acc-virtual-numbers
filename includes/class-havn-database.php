@@ -170,7 +170,7 @@ class HAVN_Database {
     /**
      * Get user purchases
      */
-    public static function get_user_purchases($user_id, $status = null) {
+    public static function get_user_purchases($user_id, $status = null,$service_id = null) {
         global $wpdb;
         
         $table_name = $wpdb->prefix . 'havn_purchases';
@@ -179,7 +179,11 @@ class HAVN_Database {
 
         $where_clause = "WHERE p.user_id = %d";
         $params = array($user_id);
-        
+
+        if($service_id !== "null") {
+            $where_clause .= " AND p.service_id = %s";
+            $params[] = $service_id;
+        }
         if ($status) {
             $where_clause .= " AND p.status = %s";
             $params[] = $status;

@@ -595,11 +595,11 @@ class HAVN_Frontend {
         if (!is_user_logged_in()) {
             wp_send_json_error('لطفاً ابتدا وارد شوید');
         }
-
+        $service_id = sanitize_text_field($_POST['service_id']);
         $user_id = get_current_user_id();
         $api = new HAVN_API();
-        $balance = $api->get_user_purchases($user_id);
+        $services = $api->get_user_purchases($user_id,$service_id);
 
-        wp_send_json_success($balance);
+        wp_send_json_success($services);
     }
 } 

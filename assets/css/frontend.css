@@ -2033,4 +2033,10 @@
     clip: rect(0, 0, 0, 0) !important;
     white-space: nowrap !important;
     border: 0 !important;
-} 
+}
+.codes-error{
+  font-size: 12px !important;
+  font-weight: 300 !important;
+  color: #FC5A44 !important;
+
+}

@@ -1109,12 +1109,13 @@ function renderCountriesUser(serviceId= null) {
         },
         body: new URLSearchParams({
             action: 'havn_get_user_purchases',
+            service_id: serviceId,
             nonce: havn_ajax.nonce
         })
     })
         .then(response => response.json())
         .then(data => {
-
+            console.log(data)
             if (data.success) {
                 var allServices_user = data.data;
                 if(serviceId)
@@ -1136,8 +1137,8 @@ function renderCountriesUser(serviceId= null) {
                     return;
                 }
 
-                if(serviceId){
-                    window.currentService.purchases.forEach(purchase => {
+
+                    window.currentService.forEach(purchase => {
                         const countryElement = document.createElement('div');
                         countryElement.className = 'list-item country-item';
 
@@ -1166,7 +1167,7 @@ function renderCountriesUser(serviceId= null) {
                             const currentTime = new Date();
                             const timeDiff = (currentTime - purchaseTime) / (1000 * 60); // minutes
                             console.log(timeDiff);
-                            if (timeDiff <= 5) {
+                            if (timeDiff <= 20) {
                                 shouldShowCancel = true;
                             }
                         }
@@ -1175,54 +1176,59 @@ function renderCountriesUser(serviceId= null) {
           <div class="service-info">
       
                 <div class="service-details">
+                 <div class="service-info">
+       
+              </div>
                     <div class="service-name">
-                       
-                                            <img src="https://flagcdn.com/${purchase.country_code}.svg" 
-                         alt="${purchase.country_code}"
+                                  <img src="${purchase.service_icon}" alt="${purchase.service_name}" class="country-flag" onerror="this.style.display='none'">
+                  <div class="service-details">
+                    <div class="service-name">${purchase.service_name}</div>
+                                            <img src="https://flagcdn.com/${purchase.purchase.country_code}.svg" 
+                         alt="${purchase.purchase.country_code}"
                          class="country-flag"
                          onerror="this.src='<?php echo HAVN_PLUGIN_URL; ?>assets/images/default-flag.png'">
-                        کشور: ${purchase.country_code.toUpperCase()}
+                        کشور: ${purchase.purchase.country_code.toUpperCase()}
                     </div>
                     <div class="service-number">
                         <i class="fas fa-phone"></i>
-                        شماره: <a href="tel://${purchase.number || 'نامشخص'}">${purchase.number || 'نامشخص'}</a> 
+                        شماره: <a href="tel://${purchase.purchase.number || 'نامشخص'}">${purchase.purchase.number || 'نامشخص'}</a> 
                     </div>
-                    <div class="service-status" id="satats-number-${purchase.number_id}">
+                    <div class="service-status" id="satats-number-${purchase.purchase.number_id}">
                         <i class="fas fa-info-circle"></i>
-                        وضعیت: <span class="status-badge status-${purchase.status_number?.toLowerCase() || 'pending'}">${purchase.status_number || 'نامشخص'}</span>
+                        وضعیت: <span class="status-badge status-${purchase.purchase.status_number?.toLowerCase() || 'pending'}">${purchase.purchase.status_number || 'نامشخص'}</span>
                     </div>           
                      <div class="service-sms">
                         <div>پیامک:</div>
-                           <div class="codes-result-box code-text" id="codes-result-${purchase.number_id}" >
+                           <div class="codes-result-box code-text" id="codes-result-${purchase.purchase.number_id}" >
                                 ${existingCode}
                             </div>
-                        <div id="codes-error-${purchase.number_id}"></div>
+                        <div id="codes-error-${purchase.purchase.number_id}"></div>
                     </div>
                      
            
                 </div>
             </div>
             <div class="service-actions">
-                ${purchase.status_number === 'CANCELED' ? `
+                ${purchase.purchase.status_number === 'CANCELED' ? `
                     <div></div>
-                ` : purchase.number_id ? `
+                ` : purchase.purchase.number_id ? `
                     ${shouldShowCancel ? `
-                 <button class="view-btn primary-btn" style="margin-bottom: 10px" onclick="getCodes('${purchase.number_id}', this)">
+                 <button class="view-btn primary-btn" style="margin-bottom: 10px" onclick="getCodes('${purchase.purchase.number_id}', this)">
                             <i class="fas fa-key"></i>
                             دریافت کد
                         </button>
-                        <button class="view-btn danger-btn" onclick="cancelNumber('${purchase.number_id}', this)">
+                        <button class="view-btn danger-btn" onclick="cancelNumber('${purchase.purchase.number_id}', this)">
                             <i class="fas fa-times"></i>
                             لغو شماره
                         </button>
 
                     ` : hasExistingCode ? `
-                        <button class="view-btn primary-btn" onclick="getCodes('${purchase.number_id}', this)">
+                        <button class="view-btn primary-btn" onclick="getCodes('${purchase.purchase.number_id}', this)">
                             <i class="fas fa-key"></i>
                             دریافت کد 
                         </button>
                     ` : `
-                        <button class="view-btn primary-btn" onclick="getCodes('${purchase.number_id}', this)">
+                        <button class="view-btn primary-btn" onclick="getCodes('${purchase.purchase.number_id}', this)">
                             <i class="fas fa-key"></i>
                             دریافت کد
                         </button>
@@ -1234,119 +1240,7 @@ function renderCountriesUser(serviceId= null) {
         `;
                         container.appendChild(countryElement);
                     });
-                }else{
-                    window.currentService.forEach(purchaseAll => {
-                        const myServiceElement = document.createElement('div');
-                        myServiceElement.className = 'list-item services-user-item';
-                        myServiceElement.innerHTML  = `
- <div class="service-info">
-              <img src="${purchaseAll.service_icon}" alt="${purchaseAll.service_name}" class="service-logo" onerror="this.style.display='none'">
-              <div class="service-details">
-                <div class="service-name">${purchaseAll.service_name}</div>
-              </div>
-            </div>`;
-                        container.appendChild(myServiceElement);
 
-                        purchaseAll.purchases.forEach(purchase => {
-                            const countryElement = document.createElement('div');
-                            countryElement.className = 'list-item country-item';
-
-                        // Check if purchase has existing codes
-                        let hasExistingCode = false;
-                        let existingCode = '';
-                        let existingCodeTime = '';
-                        let shouldShowCancel = false;
-
-                        if (purchase.code) {
-                            try {
-                                const codesData = JSON.parse(purchase.code);
-                                if (codesData && codesData.code && codesData.code.trim() !== '') {
-                                    hasExistingCode = true;
-                                    existingCode = codesData.code;
-                                    existingCodeTime = codesData.received_at || 'نامشخص';
-                                }
-                            } catch (e) {
-                                // Error parsing codes
-                            }
-                        }
-
-                        // Check if 5 minutes have passed since purchase (for cancel button)
-                        if (purchase.number_id && purchase.status_number !== 'CANCELED' && !hasExistingCode) {
-                            const purchaseTime = new Date(purchase.created_at);
-                            const currentTime = new Date();
-                            const timeDiff = (currentTime - purchaseTime) / (1000 * 60); // minutes
-                            console.log(timeDiff);
-                            if (timeDiff <= 5) {
-                                shouldShowCancel = true;
-                            }
-                        }
-
-                        countryElement.innerHTML += `
-            <div class="service-info">
-      
-                <div class="service-details">
-                    <div class="service-name">
-                       
-                                            <img src="https://flagcdn.com/${purchase.country_code}.svg" 
-                         alt="${purchase.country_code}"
-                         class="country-flag"
-                         onerror="this.src='<?php echo HAVN_PLUGIN_URL; ?>assets/images/default-flag.png'">
-                        کشور: ${purchase.country_code.toUpperCase()}
-                    </div>
-                    <div class="service-number">
-                        <i class="fas fa-phone"></i>
-                        شماره: <a href="tel://${purchase.number || 'نامشخص'}">${purchase.number || 'نامشخص'}</a> 
-                    </div>
-                    <div class="service-status">
-                        <i class="fas fa-info-circle"></i>
-                        وضعیت: <span class="status-badge status-${purchase.status_number?.toLowerCase() || 'pending'}">${purchase.status_number || 'نامشخص'}</span>
-                    </div>           
-                     <div class="service-sms">
-                        <div>پیامک:</div>
-                        <div class="codes-result-box code-text" id="codes-result-${purchase.number_id}" >
-                        ${existingCode}
-                        </div>
-                        <div id="codes-error-${purchase.number_id} code-error"></div>
-                    </div>
-                     
-           
-                </div>
-            </div>
-            <div class="service-actions">
-                ${purchase.status_number === 'CANCELED' ? `
-                    <div></div>
-                ` : purchase.number_id ? `
-                    ${shouldShowCancel ? `
-                 <button class="view-btn primary-btn" style="margin-bottom: 10px" onclick="getCodes('${purchase.number_id}', this)">
-                            <i class="fas fa-key"></i>
-                            دریافت کد
-                        </button>
-                        <button class="view-btn danger-btn" onclick="cancelNumber('${purchase.number_id}', this)">
-                            <i class="fas fa-times"></i>
-                            لغو شماره
-                        </button>
-
-                    ` : hasExistingCode ? `
-                        <button class="view-btn primary-btn" onclick="getCodes('${purchase.number_id}', this)">
-                            <i class="fas fa-key"></i>
-                            دریافت کد
-                        </button>
-                    ` : `
-                        <button class="view-btn primary-btn" onclick="getCodes('${purchase.number_id}', this)">
-                            <i class="fas fa-key"></i>
-                            دریافت کد
-                        </button>
-                    `}
-                ` : `
-                    <div></div>
-                `}
-            </div>
-  
-        `;
-                        container.appendChild(countryElement);
-                    });
-                    });
-                }
             } else {
                 document.getElementById('countries-container').innerHTML = `
           <div class="row">
@@ -1412,44 +1306,20 @@ console.log(numberId)
                     if(data.data.state?.toLowerCase() == "refunded"){
                         errorBox.innerHTML = `به علت عدم دریافت کد در زمان ممکن خط بازگرداند شد`;
                         renderCountriesUser();
+                    }else {
+                        errorBox.innerHTML = `کدی دریافت نشده است`;
                     }
-                    resultBox.innerHTML = `کدی دریافت نشده است`;
                 }
             } else {
-                errorBox.innerHTML = `
-                <div class="codes-header">
-                    <h4><i class="fas fa-exclamation-triangle"></i> خطا</h4>
-                    <button class="close-codes-btn" onclick="closeCodesResult('${numberId}')">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="codes-content">
-                    <div class="error-message">
-                        <i class="fas fa-times-circle"></i>
-                        <p>${data.data}</p>
-                    </div>
-                </div>
-            `;
+                errorBox.innerHTML = `${data.data}`;
                 errorBox.style.display = 'block';
             }
         })
         .catch(error => {
-            const resultBox = document.getElementById(`codes-result-${numberId}`);
+            const errorBox = document.getElementById(`codes-error-${numberId}`);
+
             if (resultBox) {
-                resultBox.innerHTML = `
-                <div class="codes-header">
-                    <h4><i class="fas fa-exclamation-triangle"></i> خطا</h4>
-                    <button class="close-codes-btn" onclick="closeCodesResult('${numberId}')">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="codes-content">
-                    <div class="error-message">
-                        <i class="fas fa-times-circle"></i>
-                        <p>خطا در ارتباط با سرور</p>
-                    </div>
-                </div>
-            `;
+                resultBox.innerHTML = `<p>خطا در ارتباط با سرور</p>`;
                 resultBox.style.display = 'block';
             }
         })
