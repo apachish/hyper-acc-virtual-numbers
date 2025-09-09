@@ -1123,9 +1123,8 @@ function renderCountriesUser(serviceId= null) {
                 else
                     window.currentService = allServices_user;
                 container.innerHTML = '';
-                console.log(window.currentService , serviceId)
 
-                if ((!window.currentService || !window.currentService.purchases || window.currentService.purchases.length === 0) && serviceId) {
+                if ((!window.currentService || !window.currentService || window.currentService.length === 0) && serviceId) {
                     container.innerHTML = `<div class="havn-no-purchases"><i class="fas fa-phone-slash"></i><p>هیچ شماره‌ای برای این سرویس یافت نشد</p></div>`;
                     return;
                 }else if(window.currentService.length === 0 && !serviceId){
@@ -1137,6 +1136,7 @@ function renderCountriesUser(serviceId= null) {
                     return;
                 }
 
+                console.log(window.currentService , serviceId)
 
                     window.currentService.forEach(purchase => {
                         const countryElement = document.createElement('div');
@@ -1179,15 +1179,15 @@ function renderCountriesUser(serviceId= null) {
                     <div class="havn-purchase-service-name">
                         <img src="${purchase.service_icon}" alt="${purchase.service_name}" onerror="this.style.display='none'">
                         <div>${purchase.service_name}</div>
-                        <img src="https://flagcdn.com/${purchase.purchase.country_code}.svg" 
-                             alt="${purchase.purchase.country_code}"
-                             class="country-flag"
-                             onerror="this.src='<?php echo HAVN_PLUGIN_URL; ?>assets/images/default-flag.png'">
-                        <span>کشور: ${purchase.purchase.country_code.toUpperCase()}</span>
                     </div>
                     <div class="havn-purchase-number">
                         <i class="fas fa-phone"></i>
+                                              <img src="https://flagcdn.com/${purchase.purchase.country_code}.svg" 
+                             alt="${purchase.purchase.country_code}"
+                             class="country-flag"
+                             onerror="this.src='<?php echo HAVN_PLUGIN_URL; ?>assets/images/default-flag.png'">
                         <span>شماره: <a href="tel://${purchase.purchase.number || 'نامشخص'}">${purchase.purchase.number || 'نامشخص'}</a></span>
+  
                         <button class="havn-copy-phone-btn" onclick="copyPhoneNumber('${purchase.purchase.number || ''}', this)" title="کپی شماره">
                             <i class="fas fa-copy"></i>
                             کپی
@@ -1195,7 +1195,7 @@ function renderCountriesUser(serviceId= null) {
                     </div>
                     <div class="havn-purchase-status" id="satats-number-${purchase.purchase.number_id}">
                         <i class="fas fa-info-circle"></i>
-                        <span>وضعیت: <span class="havn-purchase-status-badge havn-purchase-status-${purchase.purchase.status_number?.toLowerCase() || 'pending'}">${purchase.purchase.status_number || 'نامشخص'}</span></span>
+                        <span>وضعیت: <span class="havn-purchase-status-badge havn-purchase-status-${purchase.purchase.status_number?.toLowerCase() || 'pending'}">${getStatusText(purchase.purchase.status_number)}</span></span>
                     </div>           
                     <div class="havn-purchase-sms">
                         <div>پیامک:</div>
@@ -1251,6 +1251,7 @@ function renderCountriesUser(serviceId= null) {
             }
         })
         .catch(error => {
+            console.log(error)
             document.getElementById('countries-container').innerHTML = `
         <div class="row">
           <div class="col" style="grid-column: 1 / -1; text-align: center; color: #FC5A44; padding: 40px 20px;">
@@ -1298,7 +1299,7 @@ console.log(numberId)
                     // Update the status in the UI
                     const row = button.closest('.havn-purchase-number-card');
                     if (statusBox) {
-                        statusBox.innerHTML = `<i class="fas fa-info-circle"></i> <span>وضعیت: <span class="havn-purchase-status-badge havn-purchase-status-${data.data.state?.toLowerCase() || 'pending'}">${data.data.state || 'PENDING'}</span></span>`;
+                        statusBox.innerHTML = `<i class="fas fa-info-circle"></i> <span>وضعیت: <span class="havn-purchase-status-badge havn-purchase-status-${data.data.state?.toLowerCase() || 'pending'}">${getStatusText(data.data.state)}</span></span>`;
                     }
                 } else {
                     if(data.data.state?.toLowerCase() == "refunded"){
@@ -1353,7 +1354,7 @@ function cancelNumber(numberId, button) {
                 const row = button.closest('.havn-purchase-number-card');
                 const statusElement = row.querySelector('.havn-purchase-status');
                 if (statusElement) {
-                    statusElement.innerHTML = `<i class="fas fa-info-circle"></i> <span>وضعیت: <span class="havn-purchase-status-badge havn-purchase-status-canceled">CANCELED</span></span>`;
+                    statusElement.innerHTML = `<i class="fas fa-info-circle"></i> <span>وضعیت: <span class="havn-purchase-status-badge havn-purchase-status-canceled">${getStatusText('CANCELED')}</span></span>`;
                 }
 
                 // Replace button with canceled message
@@ -1395,4 +1396,79 @@ function cancelNumber(numberId, button) {
             // Show error message
             alert('خطا در لغو شماره');
         });
+}
+
+// Function to get Persian status text
+function getStatusText(status) {
+    const statusMap = {
+        'PENDING': 'در انتظار دریافت پیامک',
+        'pending': 'در انتظار دریافت پیامک',
+        'REFUNDED': 'بازگشت خط',
+        'refunded': 'بازگشت خط',
+        'SUCCESSFUL': 'موفق',
+        'successful': 'موفق',
+        'ACTIVE': 'فعال',
+        'active': 'فعال',
+        'CANCELED': 'لغو شده',
+        'canceled': 'لغو شده',
+        'COMPLETED': 'تکمیل شده',
+        'completed': 'تکمیل شده'
+    };
+    
+    return statusMap[status] || status || 'نامشخص';
+}
+
+// Function to copy phone number to clipboard
+function copyPhoneNumber(phoneNumber, button) {
+    if (!phoneNumber || phoneNumber === 'نامشخص') {
+        alert('شماره‌ای برای کپی وجود ندارد');
+        return;
+    }
+    
+    const textArea = document.createElement('textarea');
+    textArea.value = phoneNumber;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            button.classList.add('copied');
+            button.innerHTML = '<i class="fas fa-check"></i> کپی شد!';
+            setTimeout(() => {
+                button.classList.remove('copied');
+                button.innerHTML = '<i class="fas fa-copy"></i> کپی';
+            }, 2000);
+        } else {
+            // Fallback for modern browsers
+            navigator.clipboard.writeText(phoneNumber).then(() => {
+                button.classList.add('copied');
+                button.innerHTML = '<i class="fas fa-check"></i> کپی شد!';
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    button.innerHTML = '<i class="fas fa-copy"></i> کپی';
+                }, 2000);
+            }).catch(() => {
+                alert('خطا در کپی کردن شماره');
+            });
+        }
+    } catch (err) {
+        // Fallback for modern browsers
+        navigator.clipboard.writeText(phoneNumber).then(() => {
+            button.classList.add('copied');
+            button.innerHTML = '<i class="fas fa-check"></i> کپی شد!';
+            setTimeout(() => {
+                button.classList.remove('copied');
+                button.innerHTML = '<i class="fas fa-copy"></i> کپی';
+            }, 2000);
+        }).catch(() => {
+            alert('خطا در کپی کردن شماره');
+        });
+    }
+    
+    document.body.removeChild(textArea);
 }

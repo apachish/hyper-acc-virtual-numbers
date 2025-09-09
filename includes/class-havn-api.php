@@ -669,7 +669,7 @@ class HAVN_API {
                     );
                 }
                 error_log(print_r([$services_data],true));
-//                $services_data[$service_key]['purchases'][] = $purchase;
+                $services_data[$service_key][] = $purchase;
             }
 
             // Convert to indexed array for JavaScript
