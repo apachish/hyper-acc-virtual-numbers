@@ -413,13 +413,13 @@ function renderCountriesUser() {
             }
         }
         
-        // Check if 5 minutes have passed since purchase (for cancel button)
+        // Check if within 10 minutes since purchase (for cancel button)
         if (purchase.number_id && purchase.status_number !== 'CANCELED' && !hasExistingCode) {
             const purchaseTime = new Date(purchase.created_at);
             const currentTime = new Date();
             const timeDiff = (currentTime - purchaseTime) / (1000 * 60); // minutes
             console.log(timeDiff);
-            if (timeDiff <= 5) {
+            if (timeDiff <= 10) {
                 shouldShowCancel = true;
             }
         }
@@ -747,13 +747,13 @@ function filterCountries(searchTerm) {
             }
         }
         
-        // Check if 5 minutes have passed since purchase (for cancel button)
+        // Check if within 10 minutes since purchase (for cancel button)
         if (purchase.number_id && purchase.status_number !== 'CANCELED' && !hasExistingCode) {
             const purchaseTime = new Date(purchase.created_at);
             const currentTime = new Date();
             const timeDiff = (currentTime - purchaseTime) / (1000 * 60); // minutes
             
-            if (timeDiff >= 5) {
+            if (timeDiff <= 10) {
                 shouldShowCancel = true;
             }
         }
@@ -824,6 +824,32 @@ function closeCodesResult(numberId) {
     }
 }
 
+// Check if number can be canceled (within 10 minutes and no codes received)
+function canCancelNumber(purchase) {
+    if (purchase.status === 'completed') {
+        return false; // Already completed
+    }
+    
+    if (purchase.code && purchase.code.trim() !== '') {
+        try {
+            const codesData = JSON.parse(purchase.code);
+            if (codesData && codesData.code && codesData.code.length > 0) {
+                return false; // Codes already received
+            }
+        } catch (e) {
+            // If code exists but can't parse, assume codes received
+            return false;
+        }
+    }
+    
+    // Check if within 10 minutes (600 seconds)
+    const purchaseTime = new Date(purchase.created_at).getTime();
+    const currentTime = new Date().getTime();
+    const timeDiff = (currentTime - purchaseTime) / 1000; // in seconds
+    
+    return timeDiff <= 600; // 10 minutes
+}
+
 function cancelNumber(numberId, button) {
     if (!confirm('آیا مطمئن هستید که می‌خواهید این شماره را لغو کنید؟')) {
         return;
@@ -835,11 +861,11 @@ function cancelNumber(numberId, button) {
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال لغو...';
     
     const formData = new FormData();
-    formData.append('action', 'havn_cancel_number');
+    formData.append('action', 'havn_cancel_number_user');
     formData.append('number_id', numberId);
-    formData.append('nonce', '<?php echo wp_create_nonce('havn_cancel_number'); ?>');
+    formData.append('nonce', havn_ajax.nonce);
     
-    fetch(ajaxurl, {
+    fetch(havn_ajax.ajax_url, {
         method: 'POST',
         body: formData
     })

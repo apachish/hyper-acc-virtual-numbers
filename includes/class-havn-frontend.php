@@ -14,7 +14,7 @@ class HAVN_Frontend {
         add_action('wp_ajax_havn_purchase_number', array($this, 'ajax_purchase_number'));
         add_action('wp_ajax_nopriv_havn_purchase_number', array($this, 'ajax_purchase_number'));
         add_action('wp_ajax_havn_get_number_codes', array($this, 'ajax_get_number_codes'));
-        add_action('wp_ajax_havn_cancel_number', array($this, 'ajax_cancel_number'));
+        add_action('wp_ajax_havn_cancel_number_user', array($this, 'ajax_cancel_number'));
         add_action('wp_ajax_havn_get_purchase_details', array($this, 'ajax_get_purchase_details'));
         add_action('wp_ajax_havn_get_service_countries', array($this, 'ajax_get_service_countries'));
         add_action('wp_ajax_nopriv_havn_get_service_countries', array($this, 'ajax_get_service_countries'));
@@ -508,6 +508,15 @@ class HAVN_Frontend {
             if ($codes_data && !empty($codes_data['code'])) {
                 wp_send_json_error('شماره‌ای که کد دریافت کرده قابل لغو نیست');
             }
+        }
+        
+        // Check if purchase is within 10 minutes (600 seconds)
+        $purchase_time = strtotime($purchase->created_at);
+        $current_time = current_time('timestamp');
+        $time_diff = $current_time - $purchase_time;
+        
+        if ($time_diff > 600) { // 10 minutes = 600 seconds
+            wp_send_json_error('فقط تا 10 دقیقه بعد از خرید امکان لغو وجود دارد');
         }
         
         // Cancel number via API

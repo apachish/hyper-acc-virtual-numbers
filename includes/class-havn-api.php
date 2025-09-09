@@ -173,6 +173,7 @@ class HAVN_API {
     }
 
     public function get_number_codes($number_id) {
+
         $cache_key = false;
         $url = "/numbers/".$number_id."/codes";
         $result = $this->get_curl($url, $cache_key);
@@ -230,6 +231,7 @@ class HAVN_API {
 
         error_log(print_r(["cancel number"], true));
         error_log(print_r([$status_number,$purchase], true));
+        error_log(print_r([$status,$purchase->status_number ], true));
         // Handle refund if status is canceled or refunded
         if (($status_number === 'canceled' || $status_number === 'refunded') && $purchase) {
             $this->process_refund($purchase);
@@ -260,17 +262,12 @@ class HAVN_API {
      */
     private function process_refund($purchase) {
         global $wpdb;
-        
         // Only refund if status was pending (not already processed)
-  
-        
         $user_id = $purchase->user_id;
         $cost = floatval($purchase->cost);
-        
         if ($cost <= 0) {
             return;
         }
-        
         // Get current user balance
         $current_balance = get_user_meta($user_id, 'havn_balance', true);
         $current_balance = floatval($current_balance ?: 0);
@@ -278,7 +275,10 @@ class HAVN_API {
         // Add refund amount to user balance
         $new_balance = $current_balance + $cost;
         update_user_meta($user_id, 'havn_balance', $new_balance);
-        
+
+
+        $refund_ok = $this->refund_user_balance($purchase->user_id, $purchase->price, '', '', 'لغو سیستمی');
+
         // Log the refund
         $wpdb->insert(
             $wpdb->prefix . 'havn_transactions',
@@ -291,6 +291,9 @@ class HAVN_API {
             ),
             array('%d', '%s', '%f', '%s', '%s')
         );
+
+        // Update status in database
+
     }
     
     /**

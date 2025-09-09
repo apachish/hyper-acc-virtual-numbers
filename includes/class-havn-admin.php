@@ -315,20 +315,24 @@ class HAVN_Admin {
      */
     public function ajax_cancel_number() {
         check_ajax_referer('havn_cancel_number', 'nonce');
-        if (!current_user_can('manage_options')) {
-            wp_die('Unauthorized');
-        }
-        
+        $current_user_id = get_current_user_id();
         $number_id = sanitize_text_field($_POST['number_id']);
-        
+
         if (empty($number_id)) {
             wp_send_json_error('شناسه شماره الزامی است');
         }
-        
+
         // Get purchase details to refund the user
         global $wpdb;
         $table_name = $wpdb->prefix . 'havn_purchases';
         $purchase = $wpdb->get_row($wpdb->prepare("SELECT user_id, price FROM $table_name WHERE number_id = %s", $number_id));
+
+
+        if (!current_user_can('manage_options') && $purchase->user_id != $current_user_id) {
+            wp_die('Unauthorized');
+        }
+        
+
         
         if (!$purchase) {
             wp_send_json_error('رکورد خرید یافت نشد');
