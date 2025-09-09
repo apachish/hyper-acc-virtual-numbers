@@ -315,6 +315,7 @@ class HAVN_Admin {
      */
     public function ajax_cancel_number() {
         check_ajax_referer('havn_cancel_number', 'nonce');
+
         $current_user_id = get_current_user_id();
         $number_id = sanitize_text_field($_POST['number_id']);
 
@@ -340,29 +341,29 @@ class HAVN_Admin {
         
         $api = new HAVN_API();
         $result = $api->cancel_number($number_id);
-        
+
         if ($result['success']) {
             // Refund the user's money
-            $refund_ok = $api->refund_user_balance($purchase->user_id, $purchase->price, '', '', 'لغو شماره توسط ادمین');
+//            $refund_ok = $api->refund_user_balance($purchase->user_id, $purchase->price, '', '', 'لغو شماره توسط ادمین');
             
             // Update status in database
-            $wpdb->update(
-                $table_name,
-                array(
-                    'status_number' => 'canceled',
-                    'updated_at' => current_time('mysql')
-                ),
-                array('number_id' => $number_id),
-                array('%s', '%s'),
-                array('%s')
-            );
+//            $wpdb->update(
+//                $table_name,
+//                array(
+//                    'status_number' => 'canceled',
+//                    'updated_at' => current_time('mysql')
+//                ),
+//                array('number_id' => $number_id),
+//                array('%s', '%s'),
+//                array('%s')
+//            );
             
             $message = $result['message'];
-            if ($refund_ok) {
-                $message .= ' - پول به حساب کاربر برگشت';
-            } else {
-                $message .= ' - خطا در بازگشت پول';
-            }
+//            if ($refund_ok) {
+//                $message .= ' - پول به حساب کاربر برگشت';
+//            } else {
+//                $message .= ' - خطا در بازگشت پول';
+//            }
             
             wp_send_json_success($message);
         } else {

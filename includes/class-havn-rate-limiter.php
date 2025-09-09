@@ -23,7 +23,10 @@ class HAVN_Rate_Limiter {
                 'block_until' => get_user_meta($user_id, 'havn_block_until', true)
             );
         }
-        
+        $timezone = get_option('timezone_string');
+        if ( $timezone ) {
+            date_default_timezone_set( $timezone );
+        }
         // Check pending numbers limit (max 3)
         $pending_count = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$wpdb->prefix}havn_purchases 
@@ -93,7 +96,10 @@ class HAVN_Rate_Limiter {
      */
     public static function check_cancellation_pattern($user_id) {
         global $wpdb;
-        
+        $timezone = get_option('timezone_string');
+        if ( $timezone ) {
+            date_default_timezone_set( $timezone );
+        }
         // Check cancellations in last 24 hours
         $one_day_ago = date('Y-m-d H:i:s', strtotime('-24 hours'));
         $cancellations = $wpdb->get_var($wpdb->prepare(
@@ -122,7 +128,10 @@ class HAVN_Rate_Limiter {
         global $wpdb;
         
         $stats = array();
-        
+        $timezone = get_option('timezone_string');
+        if ( $timezone ) {
+            date_default_timezone_set( $timezone );
+        }
         // Pending numbers count
         $stats['pending_count'] = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$wpdb->prefix}havn_purchases 

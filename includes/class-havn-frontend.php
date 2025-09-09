@@ -14,7 +14,7 @@ class HAVN_Frontend {
         add_action('wp_ajax_havn_purchase_number', array($this, 'ajax_purchase_number'));
         add_action('wp_ajax_nopriv_havn_purchase_number', array($this, 'ajax_purchase_number'));
         add_action('wp_ajax_havn_get_number_codes', array($this, 'ajax_get_number_codes'));
-        add_action('wp_ajax_havn_cancel_number_user', array($this, 'ajax_cancel_number'));
+        add_action('wp_ajax_havn_cancel_number_user', array($this, 'ajax_cancel_number_user'));
         add_action('wp_ajax_havn_get_purchase_details', array($this, 'ajax_get_purchase_details'));
         add_action('wp_ajax_havn_get_service_countries', array($this, 'ajax_get_service_countries'));
         add_action('wp_ajax_nopriv_havn_get_service_countries', array($this, 'ajax_get_service_countries'));
@@ -477,7 +477,7 @@ class HAVN_Frontend {
     /**
      * AJAX handler for canceling numbers
      */
-    public function ajax_cancel_number() {
+    public function ajax_cancel_number_user() {
         check_ajax_referer('havn_cancel_number', 'nonce');
         
         if (!is_user_logged_in()) {
@@ -485,7 +485,6 @@ class HAVN_Frontend {
         }
         
         $number_id = sanitize_text_field($_POST['number_id']);
-        
         if (empty($number_id)) {
             wp_send_json_error('شناسه شماره الزامی است');
         }
@@ -522,7 +521,7 @@ class HAVN_Frontend {
         // Cancel number via API
         $api = new HAVN_API();
         $result = $api->cancel_number($number_id);
-        
+
         if ($result) {
             // Update database status
             global $wpdb;

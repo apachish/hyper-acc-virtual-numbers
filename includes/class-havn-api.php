@@ -193,7 +193,7 @@ class HAVN_API {
      */
     private function save_codes_to_database($number_id, $codes_data) {
         global $wpdb;
-        
+
         $table_name = $wpdb->prefix . 'havn_purchases';
         
         // Prepare codes for storage
@@ -278,7 +278,11 @@ class HAVN_API {
 
 
         $refund_ok = $this->refund_user_balance($purchase->user_id, $purchase->price, '', '', 'لغو سیستمی');
+        if (!$refund_ok) {
+            error_log(print_r(["cancel number error"], true));
 
+            return ' - خطا در بازگشت پول';
+        }
         // Log the refund
         $wpdb->insert(
             $wpdb->prefix . 'havn_transactions',
@@ -442,7 +446,7 @@ class HAVN_API {
         }
         
         $status_code = wp_remote_retrieve_response_code($response);
-        
+
         if ($status_code === 204) {
             // Update local status to CANCELED
             $wpdb->update(
@@ -651,7 +655,6 @@ class HAVN_API {
 
             // Group purchases by service
             foreach ($purchases as $purchase) {
-
                 $service_key = $purchase->id;
 
                 if (!isset($services_data[$service_key])) {
@@ -668,8 +671,6 @@ class HAVN_API {
                         'purchase' => $purchase
                     );
                 }
-                error_log(print_r([$services_data],true));
-                $services_data[$service_key][] = $purchase;
             }
 
             // Convert to indexed array for JavaScript

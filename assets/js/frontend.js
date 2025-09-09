@@ -1117,17 +1117,12 @@ function renderCountriesUser(serviceId= null) {
         .then(data => {
             console.log(data)
             if (data.success) {
-                var allServices_user = data.data;
-                if(serviceId)
-                    window.currentService = allServices_user.find(s => s.service_id === serviceId);
-                else
-                    window.currentService = allServices_user;
                 container.innerHTML = '';
 
-                if ((!window.currentService || !window.currentService || window.currentService.length === 0) && serviceId) {
+                if ((!data.data || !data.data || data.data.length === 0) && serviceId) {
                     container.innerHTML = `<div class="havn-no-purchases"><i class="fas fa-phone-slash"></i><p>هیچ شماره‌ای برای این سرویس یافت نشد</p></div>`;
                     return;
-                }else if(window.currentService.length === 0 && !serviceId){
+                }else if(data.data.length === 0 && !serviceId){
                     container.innerHTML = `
                     <div class="havn-no-purchases">
                 <i class="fas fa-phone-slash"></i>
@@ -1136,9 +1131,9 @@ function renderCountriesUser(serviceId= null) {
                     return;
                 }
 
-                console.log(window.currentService , serviceId)
+                console.log(data.data , serviceId)
 
-                    window.currentService.forEach(purchase => {
+                    data.data.forEach(purchase => {
                         const countryElement = document.createElement('div');
                         countryElement.className = 'havn-purchase-number-card';
 
@@ -1148,9 +1143,9 @@ function renderCountriesUser(serviceId= null) {
                         let existingCodeTime = '';
                         let shouldShowCancel = false;
 
-                        if (purchase.code) {
+                        if (purchase.purchase.code) {
                             try {
-                                const codesData = JSON.parse(purchase.code);
+                                const codesData = JSON.parse(purchase.purchase.code);
                                 if (codesData && codesData.code && codesData.code.trim() !== '') {
                                     hasExistingCode = true;
                                     existingCode = codesData.code;
@@ -1161,9 +1156,10 @@ function renderCountriesUser(serviceId= null) {
                             }
                         }
 
+                        console.log(purchase.purchase.number_id , purchase.purchase.status_number !== 'canceled' , !hasExistingCode)
                         // Check if 5 minutes have passed since purchase (for cancel button)
-                        if (purchase.number_id && purchase.status_number !== 'CANCELED' && !hasExistingCode) {
-                            const purchaseTime = new Date(purchase.created_at);
+                        if (purchase.purchase.number_id && purchase.purchase.status_number !== 'canceled' && !hasExistingCode) {
+                            const purchaseTime = new Date(purchase.purchase.created_at);
                             const currentTime = new Date();
                             const timeDiff = (currentTime - purchaseTime) / (1000 * 60); // minutes
                             console.log(timeDiff);
@@ -1202,7 +1198,7 @@ function renderCountriesUser(serviceId= null) {
                         <div class="havn-purchase-codes-box" id="codes-result-${purchase.purchase.number_id}">
                             ${existingCode}
                         </div>
-                        <div id="codes-error-${purchase.purchase.number_id}"></div>
+                        <div id="codes-error-${purchase.purchase.number_id}" class="codes-error"></div>
                     </div>
                 </div>
             </div>
@@ -1211,7 +1207,7 @@ function renderCountriesUser(serviceId= null) {
                     <div></div>
                 ` : purchase.purchase.number_id ? `
                     ${shouldShowCancel ? `
-                 <button class="havn-purchase-btn havn-purchase-btn-primary" style="margin-bottom: 10px" onclick="getCodes('${purchase.purchase.number_id}', this)">
+                 <button class="havn-purchase-btn havn-purchase-btn-primary"  onclick="getCodes('${purchase.purchase.number_id}', this)">
                             <i class="fas fa-key"></i>
                             دریافت کد
                         </button>
@@ -1339,7 +1335,7 @@ function cancelNumber(numberId, button) {
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال لغو...';
 
     const formData = new FormData();
-    formData.append('action', 'havn_cancel_number');
+    formData.append('action', 'havn_cancel_number_user');
     formData.append('number_id', numberId);
     formData.append('nonce', document.getElementById('cancel_nonce').value);
     console.log(formData)
