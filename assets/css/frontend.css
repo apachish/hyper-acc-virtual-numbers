@@ -1328,8 +1328,7 @@
   grid-template-columns: 1fr 2fr;
   align-items: start;
 }
-.havn-virtual-numbers-container .list-item .service-sms div {
-}
+/* Removed empty CSS rule */
 
 .havn-virtual-numbers-container .list-item .view-btn {
   background: #FC5A44 !important;
@@ -1640,50 +1639,50 @@
 
 @media (max-width: 768px) {
   .havn-virtual-numbers-container {
-    padding: 10px !important;
+    padding: 8px !important;
   }
   
   .havn-virtual-numbers-container .rent-wrapper {
-    margin: 10px !important;
+    margin: 8px !important;
   }
   
   .havn-virtual-numbers-container .rent-header {
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 10px !important;
     align-items: stretch !important;
-    padding: 16px !important;
+    padding: 12px !important;
   }
   
   .havn-virtual-numbers-container .title-section {
     flex-direction: row !important;
-    gap: 8px !important;
+    gap: 6px !important;
     align-items: center !important;
     justify-content: space-between !important;
   }
   
   .havn-virtual-numbers-container .wallet-balance {
     justify-content: center !important;
-    max-width: 180px !important;
-    padding: 3px 6px !important;
+    max-width: 160px !important;
+    padding: 2px 4px !important;
     flex-shrink: 0 !important;
   }
   
   .havn-virtual-numbers-container .balance-icon {
-    width: 20px !important;
-    height: 20px !important;
-    font-size: 12px !important;
-  }
-  
-  .havn-virtual-numbers-container .balance-label {
-    font-size: 8px !important;
-  }
-  
-  .havn-virtual-numbers-container .balance-amount {
+    width: 18px !important;
+    height: 18px !important;
     font-size: 10px !important;
   }
   
+  .havn-virtual-numbers-container .balance-label {
+    font-size: 7px !important;
+  }
+  
+  .havn-virtual-numbers-container .balance-amount {
+    font-size: 9px !important;
+  }
+  
   .havn-virtual-numbers-container .rent-title {
-    font-size: 20px !important;
+    font-size: 18px !important;
     text-align: right !important;
     margin: 0 !important;
     flex: 1 !important;
@@ -1695,59 +1694,89 @@
   
   .havn-virtual-numbers-container .search-box input {
     width: 100% !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
   }
   
   .havn-virtual-numbers-container .rent-body {
     grid-template-columns: 1fr !important;
-    gap: 20px !important;
-    padding: 16px !important;
+    gap: 15px !important;
+    padding: 12px !important;
   }
   
   .havn-virtual-numbers-container .rent-list {
-    height: 300px !important;
+    height: 400px !important;
     order: 1 !important;
+    max-height: 400px !important;
   }
   
   .havn-virtual-numbers-container .tabs {
     justify-content: center !important;
-    margin: 16px !important;
+    margin: 12px !important;
   }
   
   .havn-virtual-numbers-container .tab {
-    font-size: 13px !important;
-    padding: 10px 16px !important;
+    font-size: 12px !important;
+    padding: 8px 12px !important;
   }
   
   .havn-virtual-numbers-container .services-container {
-    padding: 12px !important;
+    padding: 8px !important;
   }
   
   .havn-virtual-numbers-container .list-item {
-    padding: 12px !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-    text-align: center !important;
+    padding: 8px !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    text-align: right !important;
+    margin-bottom: 6px !important;
+    border-radius: 8px !important;
   }
   
   .havn-virtual-numbers-container .list-item .service-info {
-    flex-direction: column !important;
-    gap: 8px !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    flex: 1 !important;
   }
   
   .havn-virtual-numbers-container .list-item .service-logo {
-    width: 60px !important;
-    height: 60px !important;
+    width: 35px !important;
+    height: 35px !important;
+    border-radius: 6px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-details {
+    flex: 1 !important;
   }
   
   .havn-virtual-numbers-container .list-item .service-name {
-    font-size: 16px !important;
+    font-size: 13px !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-number {
+    font-size: 11px !important;
+    margin: 2px 0 !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-status {
+    font-size: 10px !important;
+    margin: 2px 0 !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-sms {
+    font-size: 10px !important;
+    margin: 2px 0 !important;
+    grid-template-columns: 1fr !important;
   }
   
   .havn-virtual-numbers-container .list-item .view-btn {
-    width: 100% !important;
+    width: auto !important;
     justify-content: center !important;
-    padding: 12px !important;
-    font-size: 14px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    min-width: 60px !important;
   }
   
   .havn-virtual-numbers-container .rent-table-box {
@@ -1759,22 +1788,23 @@
   }
   
   .havn-virtual-numbers-container .rent-table {
-    padding: 0 12px 12px 12px !important;
+    padding: 0 8px 8px 8px !important;
   }
   
   .havn-virtual-numbers-container .rent-table .row {
     grid-template-columns: 1fr !important;
-    gap: 12px !important;
+    gap: 8px !important;
     text-align: right !important;
-    padding: 16px !important;
+    padding: 12px !important;
     position: relative !important;
+    margin-bottom: 6px !important;
   }
   
   .havn-virtual-numbers-container .rent-table .row .col:first-child {
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
-    padding-bottom: 8px !important;
+    gap: 8px !important;
+    padding-bottom: 6px !important;
     border-bottom: 1px solid #e5e7eb !important;
   }
   
@@ -1807,99 +1837,161 @@
   .havn-virtual-numbers-container .rent-table .row .col:last-child {
     display: flex !important;
     justify-content: center !important;
-    margin-top: 8px !important;
+    margin-top: 6px !important;
   }
   
   .havn-virtual-numbers-container .btn {
     width: 100% !important;
-    padding: 12px !important;
-    font-size: 14px !important;
+    padding: 10px !important;
+    font-size: 12px !important;
   }
   
   .havn-virtual-numbers-container .rent-footer {
     flex-direction: column !important;
     text-align: center !important;
-    gap: 12px !important;
-    padding: 16px !important;
+    gap: 8px !important;
+    padding: 12px !important;
   }
   
   .havn-virtual-numbers-container .pagination-controls {
     justify-content: center !important;
-    gap: 8px !important;
+    gap: 6px !important;
   }
   
   .havn-virtual-numbers-container .pagination-info {
-    font-size: 12px !important;
+    font-size: 11px !important;
     text-align: center !important;
     width: 100% !important;
   }
   
   .havn-virtual-numbers-container .btn.small {
     padding: 0 !important;
-    font-size: 12px !important;
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    max-width: 32px !important;
+    font-size: 11px !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
   }
   
   .havn-virtual-numbers-container .page-numbers {
-    max-width: 120px !important;
-    gap: 4px !important;
+    max-width: 100px !important;
+    gap: 3px !important;
   }
   
   .havn-virtual-numbers-container .page,
   .havn-virtual-numbers-container .page-link {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 12px !important;
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 11px !important;
   }
 }
 
 @media (max-width: 480px) {
   .havn-virtual-numbers-container {
-    padding: 10px !important;
+    padding: 6px !important;
   }
   
   .havn-virtual-numbers-container .rent-wrapper {
-    margin: 10px !important;
+    margin: 6px !important;
   }
   
   .havn-virtual-numbers-container .rent-header {
-    padding: 16px !important;
+    padding: 10px !important;
   }
   
   .havn-virtual-numbers-container .rent-title {
-    font-size: 20px !important;
+    font-size: 16px !important;
   }
   
   .havn-virtual-numbers-container .rent-body {
-    padding: 16px !important;
+    padding: 10px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-list {
+    height: 450px !important;
+    max-height: 450px !important;
+  }
+  
+  .havn-virtual-numbers-container .services-container {
+    padding: 6px !important;
   }
   
   .havn-virtual-numbers-container .list-item {
-    padding: 12px !important;
+    padding: 6px !important;
+    margin-bottom: 4px !important;
+    border-radius: 6px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-logo {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 4px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-name {
+    font-size: 12px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-number {
+    font-size: 10px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-status {
+    font-size: 9px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-sms {
+    font-size: 9px !important;
   }
   
   .havn-virtual-numbers-container .list-item .view-btn {
-    padding: 6px 12px !important;
-    font-size: 11px !important;
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+    min-width: 50px !important;
   }
   
   .havn-virtual-numbers-container .rent-filters {
-    padding: 12px !important;
-    font-size: 12px !important;
+    padding: 8px !important;
+    font-size: 10px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-table {
+    padding: 0 6px 6px 6px !important;
   }
   
   .havn-virtual-numbers-container .rent-table .row {
-    padding: 12px !important;
-    font-size: 12px !important;
+    padding: 8px !important;
+    font-size: 11px !important;
+    margin-bottom: 4px !important;
   }
   
   .havn-virtual-numbers-container .btn {
-    padding: 8px 16px !important;
-    font-size: 12px !important;
-    min-width: 80px !important;
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+    min-width: 70px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-footer {
+    padding: 8px !important;
+  }
+  
+  .havn-virtual-numbers-container .pagination-info {
+    font-size: 10px !important;
+  }
+  
+  .havn-virtual-numbers-container .btn.small {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    max-width: 24px !important;
+    font-size: 10px !important;
+  }
+  
+  .havn-virtual-numbers-container .page,
+  .havn-virtual-numbers-container .page-link {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 10px !important;
   }
 } 
 
@@ -2370,63 +2462,187 @@
 /* Responsive Design for Purchase Cards */
 @media (max-width: 768px) {
   .havn-purchase-number-card {
-    padding: 12px !important;
+    padding: 8px !important;
+    margin-bottom: 8px !important;
+    border-radius: 10px !important;
   }
   
   .havn-purchase-service-name {
-    font-size: 0.9rem !important;
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 6px !important;
+    font-size: 0.8rem !important;
+    flex-direction: row !important;
+    text-align: right !important;
+    gap: 4px !important;
   }
   
   .havn-purchase-service-name img {
-    width: 25px !important;
-    height: 25px !important;
+    width: 20px !important;
+    height: 20px !important;
   }
   
   .havn-purchase-actions {
     justify-content: center !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
   }
   
   .havn-purchase-btn {
     flex: 1 !important;
-    min-width: 100px !important;
-  }
-  
-  .havn-purchase-number {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 6px !important;
-  }
-  
-  .havn-copy-phone-btn {
-    align-self: flex-end !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .havn-purchase-number-card {
-    padding: 10px !important;
+    min-width: 80px !important;
+    padding: 6px 8px !important;
+    font-size: 10px !important;
   }
   
   .havn-purchase-number,
   .havn-purchase-status,
   .havn-purchase-sms {
-    padding: 8px !important;
-  }
-  
-  .havn-purchase-btn {
-    padding: 6px 10px !important;
+    padding: 6px !important;
     font-size: 11px !important;
   }
   
-  .havn-purchase-codes-box {
-    font-size: 12px !important;
+  .havn-purchase-number {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 4px !important;
   }
   
   .havn-copy-phone-btn {
-    padding: 4px 8px !important;
+    padding: 3px 6px !important;
+    font-size: 9px !important;
+  }
+  
+  .havn-purchase-codes-box {
+    font-size: 11px !important;
+    min-height: 25px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .havn-purchase-number-card {
+    padding: 6px !important;
+    margin-bottom: 6px !important;
+    border-radius: 8px !important;
+  }
+  
+  .havn-purchase-service-name {
+    font-size: 0.75rem !important;
+    gap: 3px !important;
+  }
+  
+  .havn-purchase-service-name img {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  .havn-purchase-number,
+  .havn-purchase-status,
+  .havn-purchase-sms {
+    padding: 4px !important;
     font-size: 10px !important;
+  }
+  
+  .havn-purchase-btn {
+    padding: 4px 6px !important;
+    font-size: 9px !important;
+    min-width: 60px !important;
+  }
+  
+  .havn-purchase-codes-box {
+    font-size: 10px !important;
+    min-height: 20px !important;
+  }
+  
+  .havn-copy-phone-btn {
+    padding: 2px 4px !important;
+    font-size: 8px !important;
+  }
+  
+  .havn-purchase-actions {
+    gap: 4px !important;
+    margin-top: 6px !important;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 360px) {
+  .havn-virtual-numbers-container {
+    padding: 4px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-wrapper {
+    margin: 4px !important;
+  }
+  
+  .havn-virtual-numbers-container .rent-list {
+    height: 500px !important;
+    max-height: 500px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item {
+    padding: 4px !important;
+    margin-bottom: 3px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-logo {
+    width: 25px !important;
+    height: 25px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-name {
+    font-size: 11px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-number {
+    font-size: 9px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-status {
+    font-size: 8px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .service-sms {
+    font-size: 8px !important;
+  }
+  
+  .havn-virtual-numbers-container .list-item .view-btn {
+    padding: 3px 6px !important;
+    font-size: 9px !important;
+    min-width: 40px !important;
+  }
+  
+  .havn-purchase-number-card {
+    padding: 4px !important;
+    margin-bottom: 4px !important;
+  }
+  
+  .havn-purchase-service-name {
+    font-size: 0.7rem !important;
+  }
+  
+  .havn-purchase-service-name img {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  .havn-purchase-number,
+  .havn-purchase-status,
+  .havn-purchase-sms {
+    padding: 3px !important;
+    font-size: 9px !important;
+  }
+  
+  .havn-purchase-btn {
+    padding: 3px 4px !important;
+    font-size: 8px !important;
+    min-width: 50px !important;
+  }
+  
+  .havn-purchase-codes-box {
+    font-size: 9px !important;
+    min-height: 18px !important;
+  }
+  
+  .havn-copy-phone-btn {
+    padding: 1px 3px !important;
+    font-size: 7px !important;
   }
 }

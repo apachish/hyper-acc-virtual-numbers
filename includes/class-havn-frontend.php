@@ -514,8 +514,8 @@ class HAVN_Frontend {
         $current_time = current_time('timestamp');
         $time_diff = $current_time - $purchase_time;
         
-        if ($time_diff > 600) { // 10 minutes = 600 seconds
-            wp_send_json_error('فقط تا 10 دقیقه بعد از خرید امکان لغو وجود دارد');
+        if ($time_diff < 300  || $time_diff > 1200) { // 10 minutes = 600 seconds
+            wp_send_json_error('فقط بین ۵ تا ۲۰ دقیقه بعد از خرید امکان لغو وجود دارد');
         }
         
         // Cancel number via API

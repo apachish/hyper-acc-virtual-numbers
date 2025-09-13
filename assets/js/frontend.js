@@ -1163,7 +1163,7 @@ function renderCountriesUser(serviceId= null) {
                             const currentTime = new Date();
                             const timeDiff = (currentTime - purchaseTime) / (1000 * 60); // minutes
                             console.log(timeDiff);
-                            if (timeDiff <= 20) {
+                            if (timeDiff > 5 && timeDiff <= 20) {
                                 shouldShowCancel = true;
                             }
                         }
@@ -1284,6 +1284,7 @@ console.log(numberId)
             if (!resultBox) return;
             console.log(data)
             if (data.success) {
+                errorBox.innerHTML = ``;
                 if (data.data && data.data.code && data.data.code.length > 0) {
                     // Show new codes in the result box
                     const codesHtml = data.data.code;
