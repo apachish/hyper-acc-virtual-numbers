@@ -2646,3 +2646,151 @@
     font-size: 7px !important;
   }
 }
+
+
+
+/* ===== MOBILE BOTTOM NAVIGATION ===== */
+
+/* Mobile Bottom Navigation */
+.havn-mobile-bottom-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: #ffffff !important;
+  border-top: 1px solid #e5e7eb !important;
+  display: none !important;
+  justify-content: space-around !important;
+  align-items: center !important;
+  padding: 8px 0 !important;
+  z-index: 1000 !important;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.bottom-nav-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 12px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  border-radius: 8px !important;
+  min-width: 60px !important;
+  position: relative !important;
+  text-decoration: none;
+
+}
+
+.bottom-nav-item:hover {
+  background: #f8f9fa !important;
+  transform: translateY(-2px) !important;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.95) !important;
+  transition: transform 0.1s ease !important;
+}
+
+.bottom-nav-item.active {
+  background: linear-gradient(135deg, #fef2f2 0%, #fef7f7 100%) !important;
+  border: 1px solid #FC5A44 !important;
+  box-shadow: 0 2px 8px rgba(252, 90, 68, 0.2) !important;
+}
+
+.bottom-nav-item.active::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -1px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 20px !important;
+  height: 3px !important;
+  background: linear-gradient(135deg, #FC5A44 0%, #FF6B6B 100%) !important;
+  border-radius: 0 0 10px 10px !important;
+}
+
+.nav-icon {
+  font-size: 20px !important;
+  margin-bottom: 4px !important;
+  transition: all 0.3s ease !important;
+}
+
+.bottom-nav-item.active .nav-icon {
+  transform: scale(1.1) !important;
+  filter: drop-shadow(0 2px 4px rgba(252, 90, 68, 0.3)) !important;
+}
+
+.nav-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #6b7280 !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+  transition: all 0.3s ease !important;
+}
+
+.bottom-nav-item.active .nav-label {
+  color: #FC5A44 !important;
+  font-weight: 700 !important;
+}
+
+/* Add bottom padding to main content when bottom nav is visible */
+@media (max-width: 768px) {
+  .havn-virtual-numbers-container {
+    padding-bottom: 80px !important;
+  }
+
+  .havn-mobile-bottom-nav {
+    display: flex !important;
+  }
+
+  /* Hide bottom nav when modal is open */
+  .havn-virtual-numbers-container .info-modal.show ~ .havn-mobile-bottom-nav,
+  .havn-virtual-numbers-container .purchase-modal.show ~ .havn-mobile-bottom-nav,
+  .havn-virtual-numbers-container .success-modal.show ~ .havn-mobile-bottom-nav,
+  .havn-virtual-numbers-container .error-modal.show ~ .havn-mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+/* Responsive adjustments for bottom nav */
+@media (max-width: 480px) {
+  .bottom-nav-item {
+    padding: 6px 8px !important;
+    min-width: 50px !important;
+  }
+
+  .nav-icon {
+    font-size: 18px !important;
+  }
+
+  .nav-label {
+    font-size: 10px !important;
+  }
+
+  .havn-virtual-numbers-container {
+    padding-bottom: 70px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .bottom-nav-item {
+    padding: 4px 6px !important;
+    min-width: 45px !important;
+  }
+
+  .nav-icon {
+    font-size: 16px !important;
+  }
+
+  .nav-label {
+    font-size: 9px !important;
+  }
+
+  .havn-virtual-numbers-container {
+    padding-bottom: 65px !important;
+  }
+}

@@ -716,8 +716,9 @@ function viewService(serviceShortName) {
         </div>
       </div>
     `;
-    renderCountriesUser(serviceShortName);
-
+    if(havn_ajax.is_logged_in) {
+        renderCountriesUser(serviceShortName);
+    }
     // Make AJAX request
     fetch(havn_ajax.ajax_url, {
         method: 'POST',
@@ -961,7 +962,7 @@ function renderSearchResults(filteredServices) {
 function havnPurchaseNumber(serviceId, countryCode) {
     // Check if user is logged in
     if (!havn_ajax.is_logged_in || havn_ajax.user_id === '0') {
-        showErrorModal('لطفاً ابتدا وارد شوید');
+        showErrorModal('جهت سفارش شماره مجازی، می‌بایست وارد اکانت خود شوید',"ورود/ثبت نام","https://hyper-acc.com/panel");
         return;
     }
 
@@ -1069,15 +1070,31 @@ function showSuccessModal(message) {
 }
 
 // Show error modal
-function showErrorModal(message) {
+function showErrorModal(message,button=null,link=null) {
     const modal = document.getElementById('error-modal');
     const messageEl = document.getElementById('error-message');
+    const footer = document.getElementById('error-modal-footer');
 
     if (!modal || !messageEl) {
         alert(message);
         return;
     }
 
+    if(button && link){
+        const buttonElement = document.createElement('button');
+        buttonElement.className = 'btn btn-primary';
+        buttonElement.textContent = button; // متن دکمه را از پارامتر button می‌گیریم
+
+        // زمانیکه دکمه کلیک می‌شود، کاربر به لینک هدایت شود
+        buttonElement.addEventListener('click', function() {
+            window.location.href = link;
+        });
+
+        // دکمه را به فوتر مودال اضافه می‌کنیم
+        footer.innerHTML = ''; // پاک کردن هر محتوای قبلی
+        footer.appendChild(buttonElement);
+
+    }
     messageEl.textContent = message;
     modal.style.setProperty('display', 'flex', 'important');
     document.body.style.overflow = 'hidden';
@@ -1099,6 +1116,7 @@ function closeErrorModal() {
 
 function renderCountriesUser(serviceId= null) {
     const container = document.getElementById('countries-container');
+
     if (!container) {
         return;
     }
@@ -1468,4 +1486,22 @@ function copyPhoneNumber(phoneNumber, button) {
     }
     
     document.body.removeChild(textArea);
+}
+
+function handleBottomNavClick(event, element) {
+    event.preventDefault(); // جلوگیری از پرش ناگهانی
+
+    // حذف active از همه آیتم‌ها
+    document.querySelectorAll(".havn-mobile-bottom-nav .bottom-nav-item")
+        .forEach(el => el.classList.remove("active"));
+
+    // اضافه کردن active به آیتم کلیک شده
+    element.classList.add("active");
+
+    // اسکرول نرم به سکشن مربوطه
+    const targetId = element.getAttribute("href");
+    const targetEl = document.querySelector(targetId);
+    if (targetEl) {
+        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
 }
