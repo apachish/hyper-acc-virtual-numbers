@@ -246,7 +246,17 @@ $all_services_json = json_encode($services_list);
             <div class="rent-table-box" id="countries-section">
                 <div class="rent-filters">
                     <span>کشور</span>
-                    <span>قیمت (تومان)</span>
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        قیمت (تومان)
+
+                        <div id="price-sort" style="cursor:pointer;   color:#FC5A44; font-size:12px;"
+                             data-value="asc">
+<!--                            <option value="none">بدون سورت</option>-->
+<!--                            <option value="asc">کم به زیاد</option>-->
+<!--                            <option value="desc">زیاد به کم</option>-->
+                            <i class="fa fa-sort-amount-desc" aria-hidden="true"></i>
+                        </div>
+                    </span>
                     <span>موجودی</span>
                     <span>عملیات</span>
                 </div>
@@ -352,6 +362,7 @@ $all_services_json = json_encode($services_list);
                 closeErrorModal();
             }
         });
+
     });
 
     // Intercept fetch responses for country loading to catch Unauthorized
@@ -384,6 +395,7 @@ $all_services_json = json_encode($services_list);
                 });
         }
     }
+
 
 
 </script>

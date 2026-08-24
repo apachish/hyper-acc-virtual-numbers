@@ -314,7 +314,6 @@ class HAVN_Frontend {
         $api = new HAVN_API();
         $countries = $api->get_service_countries($service_id);
 
-        
         if (!$countries || !isset($countries['info'])) {
             wp_send_json_error('خطا در دریافت اطلاعات قیمت');
         }

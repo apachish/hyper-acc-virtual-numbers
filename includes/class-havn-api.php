@@ -118,7 +118,7 @@ class HAVN_API {
         $cache_key = 'hyper_service_countries_list_.'.$service;
         $url = '/countries?service='.$service;
         $result = $this->get_curl($url, $cache_key);
-        
+
         // Save base_path to settings if available
         if (isset($result['base_path']) && !empty($result['base_path'])) {
             update_option('havn_countries_base_path', $result['base_path']);

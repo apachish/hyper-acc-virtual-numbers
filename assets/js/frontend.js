@@ -104,7 +104,8 @@ window.initServicesPage = function() {
     
     // Load wallet balance
     updateWalletBalance();
-    
+    priceSort();
+
     console.log('Services page initialized successfully');
 };
 
@@ -758,40 +759,54 @@ function viewService(serviceShortName) {
 
 // Render countries
 function renderCountries(data, serviceId) {
+    // Cache for re-render on sort change
+    try { window.lastCountriesData = data; window.lastCountriesServiceId = serviceId; } catch (e) {}
     let html = '';
 
     if (data && data.info && data.info.length > 0) {
-        data.info.forEach(c => {
+        const usdRate = parseFloat(document.getElementById('havn_usd_rate').value || '0');
+        const profitMargin = parseFloat(document.getElementById('havn_profit_margin').value || '0');
+
+        // Normalize rows with computed price for sorting
+
+        const rows = data.info.map(c => {
             const countryInfo = c.country_info || {};
             const name = countryInfo.country_name || '';
             const code = countryInfo.country_iso_code || '';
             const flag = countryInfo.country_flag || '';
-            const price = c.price || 0;
-            const stock = c.count || 0;
+            const price = parseFloat(c.price || 0);
+            const stock = parseInt(c.count || 0, 10);
             const disabled = stock <= 0;
+            const finalPrice = (price * usdRate * (1 + (profitMargin / 100))) || 0;
+            const flagUrl = flag ? (flag.startsWith('http') ? flag : 'https://nerd-peek.ams3.cdn.digitaloceanspaces.com/Virtunum/countries-flag' + flag) : '';
+            return { name, code, flagUrl, stock, disabled, finalPrice };
+        });
 
-            // Convert price to Tomans with profit margin
-            const usdRate = document.getElementById('havn_usd_rate').value;
-            const profitMargin = document.getElementById('havn_profit_margin').value;
-            const finalPrice = price * usdRate * (1 + profitMargin / 100);
 
-            // Build flag URL
-            const flagUrl = flag ?
-                (flag.startsWith('http') ? flag : 'https://nerd-peek.ams3.cdn.digitaloceanspaces.com/Virtunum/countries-flag' + flag) :
-                '';
+        // Apply sort by price (select-based)
+        const sortEl = document.getElementById('price-sort');
+        const sortMode = sortEl ? (sortEl.dataset.value || 'none') : 'asc';
+        if (sortMode === 'asc') {
+            rows.sort((a, b) => a.finalPrice - b.finalPrice);
+        } else if (sortMode === 'desc') {
+            rows.sort((a, b) => b.finalPrice - a.finalPrice);
+        }
 
+        rows.forEach(r => {
             html += `
-          <div class="row${disabled ? ' disabled' : ''}">
+          <div class="row${r.disabled ? ' disabled' : ''}">
             <div class="col">
-              ${flagUrl ? `<img src="${flagUrl}" alt="${name}" class="country-flag" onerror="this.style.display='none'">` : ''}
-              <span>${name}</span>
+              ${r.flagUrl ? `<img src="${r.flagUrl}" alt="${r.name}" class="country-flag" onerror="this.style.display='none'">` : ''}
+              <span>${r.name}</span>
             </div>
-            <div class="col">${new Intl.NumberFormat('fa-IR').format(Math.round(finalPrice))} تومان</div>
-            <div class="col">${new Intl.NumberFormat('fa-IR').format(stock)} عدد</div>
+            <div class="col">${new Intl.NumberFormat('fa-IR').format(Math.round(r.finalPrice))} تومان</div>
+            <div class="col">${new Intl.NumberFormat('fa-IR').format(r.stock)} عدد</div>
             <div class="col">
-              ${disabled ?
+              ${r.disabled ?
                 '<button class="btn disabled" disabled>غیرفعال</button>' :
-                '<button class="btn" onclick="event.stopPropagation(); havnPurchaseNumber(\''+serviceId+'\', \''+code+'\')">دریافت</button>'
+                `<button class="btn" onclick="event.stopPropagation(); havnPurchaseNumber('${serviceId}', '${r.code}')">دریافت</button>`
+            // '<button class="btn" onclick="event.stopPropagation(); havnPurchaseNumber(\''+serviceId+'\', \''+code+'\')">دریافت</button>'
+
             }
             </div>
           </div>
@@ -809,7 +824,31 @@ function renderCountries(data, serviceId) {
     }
 
     document.getElementById('countries-table').innerHTML = html;
+
+    // No UI sync needed for select; value remains
 }
+
+// Re-render countries when sort select changes
+// document.addEventListener('click', function(e) {
+//     // const target = e.target;
+//     // if (target && target.id === 'price-sort') {
+//     //     if (window.lastCountriesData) {
+//     //         renderCountries(window.lastCountriesData, window.lastCountriesServiceId);
+//     //     }
+//     // }
+//     const sortDiv = document.getElementById("price-sort");
+//     let currentValue = sortDiv.dataset.value; // مقدار از data-value
+//     console.log(currentValue)
+//     if (currentValue === "asc") {
+//         sortDiv.dataset.value = "desc";
+//         sortDiv.textContent = "مرتب‌سازی: نزولی";
+//     } else {
+//         sortDiv.dataset.value = "asc";
+//         sortDiv.textContent = "مرتب‌سازی: صعودی";
+//     }
+//
+//     console.log("مقدار فعلی:", sortDiv.dataset.value);
+// });
 
 // Search functionality - searchQuery will be defined in shortcode
 
@@ -1133,7 +1172,6 @@ function renderCountriesUser(serviceId= null) {
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
             if (data.success) {
                 container.innerHTML = '';
 
@@ -1149,7 +1187,7 @@ function renderCountriesUser(serviceId= null) {
                     return;
                 }
 
-                console.log(data.data , serviceId)
+
 
                     data.data.forEach(purchase => {
                         const countryElement = document.createElement('div');
@@ -1174,13 +1212,13 @@ function renderCountriesUser(serviceId= null) {
                             }
                         }
 
-                        console.log(purchase.purchase.number_id , purchase.purchase.status_number !== 'canceled' , !hasExistingCode)
+
                         // Check if 5 minutes have passed since purchase (for cancel button)
                         if (purchase.purchase.number_id && purchase.purchase.status_number !== 'canceled' && !hasExistingCode) {
                             const purchaseTime = new Date(purchase.purchase.created_at);
                             const currentTime = new Date();
                             const timeDiff = (currentTime - purchaseTime) / (1000 * 60); // minutes
-                            console.log(timeDiff);
+
                             if (timeDiff > 5 && timeDiff <= 20) {
                                 shouldShowCancel = true;
                             }
@@ -1282,7 +1320,7 @@ function getCodes(numberId, button) {
     const originalText = button.innerHTML;
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال دریافت...';
-console.log(numberId)
+
     const formData = new FormData();
     formData.append('action', 'havn_get_number_codes');
     formData.append('number_id', numberId);
@@ -1300,7 +1338,7 @@ console.log(numberId)
             const errorBox = document.getElementById(`codes-error-${numberId}`);
             const statusBox = document.getElementById(`satats-number-${numberId}`);
             if (!resultBox) return;
-            console.log(data)
+
             if (data.success) {
                 errorBox.innerHTML = ``;
                 if (data.data && data.data.code && data.data.code.length > 0) {
@@ -1357,7 +1395,7 @@ function cancelNumber(numberId, button) {
     formData.append('action', 'havn_cancel_number_user');
     formData.append('number_id', numberId);
     formData.append('nonce', document.getElementById('cancel_nonce').value);
-    console.log(formData)
+
     fetch(havn_ajax.ajax_url, {
         method: 'POST',
         body: formData
@@ -1504,4 +1542,32 @@ function handleBottomNavClick(event, element) {
     if (targetEl) {
         targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+}
+
+function priceSort(){
+    const sortDiv = document.getElementById("price-sort");
+
+    sortDiv.addEventListener("click", function() {
+        let currentValue = sortDiv.dataset.value; // مقدار از data-value
+        let icon = sortDiv.querySelector("i");
+
+        if (currentValue === "asc") {
+            sortDiv.dataset.value = "desc";
+            // sortDiv.textContent = "مرتب‌سازی: نزولی";
+            icon.classList.remove("fa-sort-amount-asc");
+            icon.classList.add("fa-sort-amount-desc");
+            if (window.lastCountriesData) {
+                renderCountries(window.lastCountriesData, window.lastCountriesServiceId);
+            }
+        } else {
+            sortDiv.dataset.value = "asc";
+            icon.classList.remove("fa-sort-amount-desc");
+            icon.classList.add("fa-sort-amount-asc");
+            // sortDiv.textContent = "مرتب‌سازی: صعودی";
+            renderCountries(window.lastCountriesData, window.lastCountriesServiceId);
+
+        }
+
+        console.log("مقدار فعلی:", sortDiv.dataset.value);
+    });
 }
